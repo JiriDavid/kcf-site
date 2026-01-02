@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export default function HeroSlider() {
   return (
-    <div className="relative min-h-[80vh] overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl">
+    <div className="relative min-h-[70vh] sm:min-h-[80vh] overflow-hidden rounded-3xl border border-white/10 bg-black/40 shadow-2xl">
       <Swiper
         modules={[EffectFade, Autoplay, Pagination]}
         effect="fade"
@@ -19,9 +19,24 @@ export default function HeroSlider() {
         slidesPerView={1}
         loop
         speed={700}
-        autoplay={{ delay: 5800, disableOnInteraction: false }}
-        pagination={{ clickable: true }}
+        autoplay={{
+          delay: 5800,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+        pagination={{
+          clickable: true,
+          dynamicBullets: true,
+        }}
         className="hero-swiper h-full"
+        breakpoints={{
+          640: {
+            autoplay: {
+              delay: 5800,
+              disableOnInteraction: false,
+            },
+          },
+        }}
       >
         {heroSlides.map((slide) => (
           <SwiperSlide key={slide.id}>
@@ -55,10 +70,10 @@ export default function HeroSlider() {
                     className="max-w-2xl space-y-6"
                   >
                     <div className="pill text-white">KCF Fellowship</div>
-                    <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
+                    <h1 className="text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl xl:text-6xl">
                       <span className="text-white">{slide.title}</span>
                     </h1>
-                    <p className="max-w-xl text-lg text-white">
+                    <p className="max-w-lg text-base sm:text-lg text-white">
                       {slide.subtitle}
                     </p>
                     <div className="flex flex-wrap gap-3">

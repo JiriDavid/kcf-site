@@ -93,25 +93,33 @@ export default function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="md:hidden bg-black/90 backdrop-blur-xl border-t border-white/10"
+            transition={{
+              duration: 0.2,
+              ease: "easeInOut",
+              opacity: { duration: 0.15 }
+            }}
+            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-white/10 overflow-hidden"
           >
-            <div className="container flex flex-col gap-3 py-4">
+            <div className="container flex flex-col gap-2 py-4">
               {links.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "py-2 text-base font-semibold uppercase tracking-[0.15em]",
-                    pathname === link.href ? "text-primary" : "text-foreground"
+                    "py-3 px-2 text-base font-medium uppercase tracking-[0.15em] rounded-lg transition-colors",
+                    pathname === link.href
+                      ? "text-primary bg-primary/10"
+                      : "text-white hover:bg-white/5"
                   )}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Button asChild variant="secondary" className="w-full">
-                <Link href="/events">Upcoming Events</Link>
-              </Button>
+              <div className="pt-2 border-t border-white/10 mt-2">
+                <Button asChild variant="secondary" className="w-full">
+                  <Link href="/contact">Reach Out</Link>
+                </Button>
+              </div>
             </div>
           </motion.div>
         ) : null}

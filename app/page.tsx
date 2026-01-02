@@ -14,22 +14,22 @@ export default async function Home() {
   const latestSermons = allSermons.slice(0, 3);
 
   return (
-    <div className="space-y-8 lg:space-y-1 pt-20">
-      <section className="section-shell pt-6">
+    <div className="space-y-4 sm:space-y-8 lg:space-y-1 pt-16 sm:pt-20">
+      <section className="section-shell pt-2 sm:pt-6">
         <div className="container">
           <HeroSlider />
         </div>
       </section>
 
-      <section className="section-shel lg:pb-10">
+      <section className="section-shell pb-8 sm:pb-10 lg:pb-10">
         <div className="container section-grid">
-          <div className="space-y-2">
+          <div className="space-y-4 sm:space-y-2">
             <SectionHeader
               eyebrow="Who we are"
               title="A fellowship marked by presence, formation, and sending"
               description="We gather around Jesus' presence, practice the way of the Kingdom, and release leaders to campuses, cities, and the nations."
             />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
               {[
                 "Presence-led worship",
                 "Biblical discipleship",
@@ -38,16 +38,16 @@ export default async function Home() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="glass-card flex items-center gap-3 rounded-xl"
+                  className="glass-card flex items-center gap-3 rounded-xl p-4 sm:p-6"
                 >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary" />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-br from-primary to-secondary" />
                   <p className="text-sm font-semibold text-white">{item}</p>
                 </div>
               ))}
             </div>
             <Stats />
           </div>
-          <div className="relative h-full min-h-[380px] overflow-hidden rounded-3xl border border-white/10">
+          <div className="relative h-full min-h-[300px] sm:min-h-[380px] overflow-hidden rounded-3xl border border-white/10 mt-8 sm:mt-0">
             <Image
               src={`${R2_PLACEHOLDER}/kcf-images/kcf-1.jpg`}
               alt="Fellowship"

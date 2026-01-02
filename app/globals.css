@@ -32,16 +32,16 @@
 
 @layer components {
   .section-shell {
-    @apply relative w-full py-20 lg:py-28;
+    @apply relative w-full py-12 sm:py-20 lg:py-28;
   }
   .section-grid {
-    @apply grid gap-12 lg:grid-cols-2 items-center;
+    @apply grid gap-8 sm:gap-12 lg:grid-cols-2 items-center;
   }
   .pill {
-    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-foreground/80;
+    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 sm:px-4 py-1.5 sm:py-2 text-xs uppercase tracking-[0.2em] text-foreground/80;
   }
   .glass-card {
-    @apply glass rounded-2xl border border-white/10 p-6 shadow-card;
+    @apply glass rounded-2xl border border-white/10 p-4 sm:p-6 shadow-card;
   }
 }
 

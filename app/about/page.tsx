@@ -10,24 +10,24 @@ import {
 
 export default function AboutPage() {
   return (
-    <div className="space-y-20 lg:space-y-28">
+    <div className="space-y-12 sm:space-y-20 lg:space-y-28">
       <section className="section-shell">
         <div className="container section-grid">
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <SectionHeader
               eyebrow="About"
               title="The story of KCF Fellowship"
               description="Born on campus, grown across cities, carrying a mandate to worship, disciple, and send."
             />
-            <p className="text-lg text-white">
+            <p className="text-base sm:text-lg text-white">
               We are a multi-campus fellowship centered on the presence of
               Jesus, the authority of Scripture, and the empowerment of the Holy
               Spirit. Our teams craft immersive worship spaces, mentor students
               and young professionals, and champion prayer-led mission.
             </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="glass-card rounded-2xl">
-                <h4 className="text-xl font-semibold text-white pb-2">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h4 className="text-lg sm:text-xl font-semibold text-white pb-2">
                   Mission
                 </h4>
                 <p className="text-sm text-white/70">
@@ -35,8 +35,8 @@ export default function AboutPage() {
                   commission leaders for every sphere.
                 </p>
               </div>
-              <div className="glass-card rounded-2xl">
-                <h4 className="text-xl font-semibold text-white pb-2">
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h4 className="text-lg sm:text-xl font-semibold text-white pb-2">
                   Vision
                 </h4>
                 <p className="text-sm text-white/70">
@@ -46,7 +46,7 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-          <div className="relative h-[420px] overflow-hidden rounded-3xl border border-white/10">
+          <div className="relative h-[300px] sm:h-[420px] overflow-hidden rounded-3xl border border-white/10 mt-8 sm:mt-0">
             <video
               className="absolute inset-0 h-full w-full object-cover"
               src={`${R2_PLACEHOLDER}/kcf-images/2023-kcf-video.MOV`}

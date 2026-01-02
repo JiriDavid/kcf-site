@@ -11,20 +11,20 @@ const socials = [
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-black/70 backdrop-blur-xl">
-      <div className="container grid gap-10 py-10 lg:grid-cols-12">
-        <div className="lg:col-span-5 space-y-4">
+      <div className="container grid gap-8 sm:gap-10 py-8 sm:py-10 lg:grid-cols-12">
+        <div className="lg:col-span-5 space-y-3 sm:space-y-4">
           <p className="text-xs uppercase tracking-[0.28em] text-primary">KCF Fellowship</p>
-          <h3 className="text-2xl font-semibold text-white">Worship. Grow. Impact.</h3>
+          <h3 className="text-xl sm:text-2xl font-semibold text-white">Worship. Grow. Impact.</h3>
           <p className="text-sm text-white">
             A worship-inspired community practicing presence, building disciples, and sending leaders to every sphere.
           </p>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             {socials.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-label={item.label}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:-translate-y-1 hover:border-primary hover:text-primary"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition hover:-translate-y-1 hover:border-primary hover:text-primary"
               >
                 {item.icon}
               </Link>
@@ -41,13 +41,13 @@ export default function Footer() {
               ["Gallery", "/gallery"],
               ["Contact", "/contact"]
             ].map(([label, href]) => (
-              <Link key={href} href={href} className="transition hover:text-primary text-white">
+              <Link key={href} href={href} className="transition hover:text-primary text-white py-1">
                 {label}
               </Link>
             ))}
           </div>
         </div>
-        <div className="lg:col-span-4 space-y-4">
+        <div className="lg:col-span-4 space-y-3 sm:space-y-4">
           <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">Visit</h4>
           <p className="text-sm text-white">
             Sundays · 09:30 AM<br />

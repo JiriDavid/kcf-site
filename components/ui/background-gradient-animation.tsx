@@ -36,6 +36,14 @@ export const BackgroundGradientAnimation = ({
   containerClassName?: string;
 }) => {
   const interactiveRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const positionRef = useRef({ curX: 0, curY: 0, tgX: 0, tgY: 0 });
   useEffect(() => {
@@ -69,6 +77,8 @@ export const BackgroundGradientAnimation = ({
   ]);
 
   useEffect(() => {
+    if (isMobile || !interactive) return;
+
     let frame: number;
     const animate = () => {
       const { curX, curY, tgX, tgY } = positionRef.current;
@@ -83,9 +93,11 @@ export const BackgroundGradientAnimation = ({
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [interactive, isMobile]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile || !interactive) return;
+
     if (interactiveRef.current) {
       const rect = interactiveRef.current.getBoundingClientRect();
       positionRef.current.tgX = event.clientX - rect.left;
