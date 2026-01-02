@@ -15,7 +15,7 @@ const links = [
   { href: "/sermons", label: "Sermons" },
   { href: "/events", label: "Events" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/contact", label: "Contact" }
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {
@@ -37,12 +37,21 @@ export default function Navbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all",
         scrolled ? "bg-black/80 shadow-2xl backdrop-blur-xl" : "bg-transparent"
-      ) }
+      )}
     >
       <div className="container flex items-center justify-between py-4 text-white">
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold uppercase tracking-[0.25em]">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary shadow-glow" >
-            <Image src="/kcf-logo.jpeg" alt="kcf logo" width={40} height={40} className="rounded-full" />
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold uppercase tracking-[0.25em]"
+        >
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary shadow-glow">
+            <Image
+              src="/kcf-logo.jpeg"
+              alt="kcf logo"
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
           </div>
           <span className="text-sm">KCF Fellowship</span>
         </Link>
@@ -60,10 +69,21 @@ export default function Navbar() {
             </Link>
           ))}
           <Button variant="outline" size="sm" asChild>
-            <Link href="/contact" className="text-white bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary" >Reach Out</Link>
+            <Link
+              href="/contact"
+              className="text-white bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
+            >
+              Reach Out
+            </Link>
           </Button>
         </nav>
-        <Button variant="subtle" size="icon" className="md:hidden" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
+        <Button
+          variant="subtle"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+        >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
