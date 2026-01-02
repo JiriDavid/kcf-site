@@ -7,6 +7,7 @@ import { Button } from "@/app/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 const links = [
   { href: "/", label: "Home" },
@@ -41,7 +42,7 @@ export default function Navbar() {
       <div className="container flex items-center justify-between py-4 text-white">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold uppercase tracking-[0.25em]">
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary shadow-glow" >
-            <img src="/kcf-logo.jpeg" alt="kcf logo" className="rounded-full" />
+            <Image src="/kcf-logo.jpeg" alt="kcf logo" width={40} height={40} className="rounded-full" />
           </div>
           <span className="text-sm">KCF Fellowship</span>
         </Link>

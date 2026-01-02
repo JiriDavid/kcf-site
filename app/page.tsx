@@ -2,16 +2,12 @@ import Image from "next/image";
 import HeroSlider from "./components/hero-slider";
 import SectionHeader from "./components/section-header";
 import EventsCarousel from "./components/events-carousel";
-import { DEFAULT_R2_BASE_URL } from "@/lib/static-data";
+import { DEFAULT_R2_BASE_URL, R2_PLACEHOLDER } from "@/lib/static-data";
 import { getSermons } from "@/lib/data";
 import SermonCard from "./components/sermon-card";
 import Stats from "./components/stats";
 import Link from "next/link";
 import { Button } from "./components/ui/button";
-export const R2_PLACEHOLDER =
-  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ??
-  process.env.R2_PUBLIC_BASE_URL ??
-  DEFAULT_R2_BASE_URL;
 
 export default async function Home() {
   const allSermons = await getSermons();

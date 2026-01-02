@@ -2,11 +2,7 @@ import Image from "next/image";
 import SectionHeader from "../components/section-header";
 import Timeline from "../components/timeline";
 import Stats from "../components/stats";
-import { DEFAULT_R2_BASE_URL, milestones } from "@/lib/static-data";
-export const R2_PLACEHOLDER =
-  process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ??
-  process.env.R2_PUBLIC_BASE_URL ??
-  DEFAULT_R2_BASE_URL;
+import { DEFAULT_R2_BASE_URL, milestones, R2_PLACEHOLDER } from "@/lib/static-data";
 
 export default function AboutPage() {
   return (
