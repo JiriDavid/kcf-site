@@ -96,7 +96,7 @@ export default function Navbar() {
             transition={{
               duration: 0.2,
               ease: "easeInOut",
-              opacity: { duration: 0.15 }
+              opacity: { duration: 0.15 },
             }}
             className="md:hidden bg-black/95 backdrop-blur-xl border-t border-white/10 overflow-hidden"
           >

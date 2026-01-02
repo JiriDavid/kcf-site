@@ -41,8 +41,8 @@ export const BackgroundGradientAnimation = ({
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const positionRef = useRef({ curX: 0, curY: 0, tgX: 0, tgY: 0 });

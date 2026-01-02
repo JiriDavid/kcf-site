@@ -10,8 +10,8 @@ export default function Timeline() {
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   return (
@@ -26,7 +26,7 @@ export default function Timeline() {
             viewport={{ once: true, margin: "-40px" }}
             transition={{
               duration: isMobile ? 0.3 : 0.4,
-              delay: isMobile ? 0 : idx * 0.05
+              delay: isMobile ? 0 : idx * 0.05,
             }}
             className="relative rounded-xl sm:rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-6"
           >
@@ -34,7 +34,9 @@ export default function Timeline() {
             <p className="text-xs uppercase tracking-[0.2em] text-white mb-1">
               {item.year}
             </p>
-            <h4 className="text-lg sm:text-xl font-semibold text-white mb-2">{item.title}</h4>
+            <h4 className="text-lg sm:text-xl font-semibold text-white mb-2">
+              {item.title}
+            </h4>
             <p className="text-sm text-white/90">{item.description}</p>
           </motion.div>
         ))}
