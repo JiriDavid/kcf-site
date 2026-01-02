@@ -1,0 +1,17 @@
+:root {
+  --bg: 6 78 64;
+  --fg: 141 216 204;
+  --muted: 12 152 186;
+  --gold: 13 173 141;
+  --light-gold: 48 191 191;
+  --royal: 17 100 180;
+  --border: rgba(141, 216, 204, 0.18);
+  --card: rgba(12, 152, 186, 0.08);
+  --card-foreground: #dff7f2;
+  --overlay: linear-gradient(
+    120deg,
+    rgba(6, 78, 64, 0.92) 0%,
+    rgba(6, 78, 64, 0.6) 65%,
+    rgba(6, 78, 64, 0.92) 100%
+  );
+}
