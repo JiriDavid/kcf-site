@@ -4,8 +4,29 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
 import { events } from "@/lib/static-data";
 import EventCard from "./event-card";
+import { useState, useEffect } from "react";
 
 export default function EventsCarousel() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  if (isMobile) {
+    // Static grid layout for mobile - no carousel
+    return (
+      <div className="grid gap-4 sm:hidden">
+        {events.slice(0, 3).map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <Swiper
       modules={[Autoplay, Navigation]}

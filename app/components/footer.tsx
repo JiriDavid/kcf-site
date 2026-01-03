@@ -2,22 +2,22 @@ import Link from "next/link";
 import { Facebook, Instagram, Mail, Phone, Youtube, Send } from "lucide-react";
 const socials = [
   {
-    href: "https://instagram.com",
+    href: "https://www.instagram.com/kiitchristians?igsh=MWE4N2JzaHR0Z2s3NQ==",
     icon: <Instagram className="h-4 w-4" />,
     label: "Instagram",
   },
   {
-    href: "https://telegram.org",
+    href: "https://t.me/kiitchristianfellowship2022",
     icon: <Send className="h-4 w-4" />,
     label: "Telegram",
   },
   {
-    href: "mailto:hello@kcf.org",
+    href: "mailto:kiitchristianfellowship@gmail.com",
     icon: <Mail className="h-4 w-4" />,
     label: "Email",
   },
   {
-    href: "tel:+15551213344",
+    href: "tel:+917605912067",
     icon: <Phone className="h-4 w-4" />,
     label: "Phone",
   },

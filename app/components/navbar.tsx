@@ -80,7 +80,7 @@ export default function Navbar() {
         <Button
           variant="subtle"
           size="icon"
-          className="md:hidden"
+          className="md:hidden z-60 relative"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -98,7 +98,7 @@ export default function Navbar() {
               ease: "easeInOut",
               opacity: { duration: 0.15 },
             }}
-            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-white/10 overflow-hidden"
+            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-white/10 overflow-hidden relative z-50"
           >
             <div className="container flex flex-col gap-2 py-4">
               {links.map((link) => (
