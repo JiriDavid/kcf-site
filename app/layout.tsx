@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
@@ -37,22 +38,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${playfair.variable}`}
-      suppressHydrationWarning
-    >
-      <body className="text-foreground">
-        <div className="fixed inset-0 -z-10 pointer-events-none" aria-hidden>
-          <BackgroundGradientAnimation
-            interactive={false}
-            containerClassName="h-full w-full"
-          />
-        </div>
-        <Navbar />
-        <main className="">{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${inter.variable} ${playfair.variable}`}
+        suppressHydrationWarning
+      >
+        <body className="text-foreground">
+          <div className="fixed inset-0 -z-10 pointer-events-none" aria-hidden>
+            <BackgroundGradientAnimation
+              interactive={false}
+              containerClassName="h-full w-full"
+            />
+          </div>
+          <Navbar />
+          <main className="">{children}</main>
+          <Footer />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

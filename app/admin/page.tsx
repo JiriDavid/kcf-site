@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Event, Sermon, GalleryItem } from "@/types";
 import SectionHeader from "@/app/components/section-header";
 import {
@@ -28,8 +29,12 @@ import {
 } from "@/app/components/ui/table";
 import { Plus, Save, Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth, UserButton } from "@clerk/nextjs";
 
 export default function AdminDashboard() {
+  const { isLoaded, userId } = useAuth();
+  const router = useRouter();
+
   const [events, setEvents] = useState<Event[]>([]);
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -41,6 +46,13 @@ export default function AdminDashboard() {
     null
   );
   const [uploadProgress, setUploadProgress] = useState<string>("");
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (isLoaded && !userId) {
+      router.push("/sign-in");
+    }
+  }, [isLoaded, userId, router]);
 
   // Fetch data from APIs
   useEffect(() => {
@@ -85,6 +97,23 @@ export default function AdminDashboard() {
     }),
     [events.length, sermons.length, gallery.length]
   );
+
+  // Check authentication
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Redirecting to sign in...</div>
+      </div>
+    );
+  }
 
   const handleEventSubmit = async (form: HTMLFormElement) => {
     setSaving(true);
@@ -556,6 +585,19 @@ export default function AdminDashboard() {
             description="Manage events, sermons, and gallery content. All changes are saved to the database."
             align="center"
           />
+
+          <div className="flex justify-end">
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "h-8 w-8",
+                  userButtonPopoverCard: "bg-black border-white/10",
+                  userButtonPopoverText: "text-white",
+                  userButtonPopoverActionButton: "text-white hover:bg-white/10",
+                },
+              }}
+            />
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="Events" value={counts.events} />
