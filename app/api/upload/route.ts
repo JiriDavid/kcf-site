@@ -57,6 +57,18 @@ function validateFile(file: File, config: FileConfig): string | null {
 
 export async function GET() {
   try {
+    console.log("=== R2 CREDENTIALS DIAGNOSTIC ===");
+
+    // Log the actual credentials being used (first/last 4 chars only for security)
+    const accessKey = process.env.R2_ACCESS_KEY_ID;
+    const secretKey = process.env.R2_SECRET_ACCESS_KEY;
+
+    console.log("Access Key ID:", accessKey ? `${accessKey.substring(0, 4)}...${accessKey.substring(accessKey.length - 4)}` : "NOT SET");
+    console.log("Secret Key:", secretKey ? `${secretKey.substring(0, 4)}...${secretKey.substring(secretKey.length - 4)}` : "NOT SET");
+    console.log("Bucket Name:", process.env.R2_BUCKET_NAME);
+    console.log("Endpoint:", process.env.R2_ENDPOINT);
+    console.log("Node Environment:", process.env.NODE_ENV);
+
     console.log("R2 configuration check:", {
       hasAccessKey: !!process.env.R2_ACCESS_KEY_ID,
       hasSecretKey: !!process.env.R2_SECRET_ACCESS_KEY,
@@ -80,61 +92,113 @@ export async function GET() {
       .map(([key]) => key);
 
     if (missingVars.length > 0) {
+      console.error("Missing environment variables:", missingVars);
       return NextResponse.json(
         {
           status: "error",
           message: "Missing environment variables",
           missing: missingVars,
           nodeEnv: process.env.NODE_ENV,
+          diagnostic: {
+            accessKeyPrefix: accessKey ? accessKey.substring(0, 8) : null,
+            hasSecretKey: !!secretKey,
+            bucketName: process.env.R2_BUCKET_NAME,
+            endpoint: process.env.R2_ENDPOINT,
+          },
         },
         { status: 500 }
       );
     }
 
-    // Test connection by listing objects
-    const listCommand = new ListObjectsV2Command({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      MaxKeys: 1,
-    });
+    // Test connection by trying to upload a tiny test file
+    console.log("Testing R2 upload capability...");
+    let uploadTestPassed = false;
+    let bucketAccessible = false;
 
-    console.log("Testing R2 list operation...");
-    let listResult;
     try {
-      listResult = await s3Client.send(listCommand);
-      console.log("R2 list operation successful");
-    } catch (listError: any) {
-      console.log("List operation error:", listError);
+      const testKey = `test-connection-${Date.now()}.txt`;
+      const testContent = "connection test";
 
-      // If the error indicates we can reach R2 but bucket is empty/inaccessible
-      if (
-        listError.Code === "NoSuchKey" ||
-        listError.Code === "NoSuchBucket" ||
-        listError.name === "NoSuchKey" ||
-        listError.name === "NoSuchBucket"
-      ) {
-        console.log("R2 reachable but bucket issue detected");
-        return NextResponse.json({
-          status: "partial",
-          message: "R2 connection works but bucket may not exist or be empty",
-          bucket: process.env.R2_BUCKET_NAME,
-          error: listError.message,
-          nodeEnv: process.env.NODE_ENV,
-          timestamp: new Date().toISOString(),
-          recommendation: "Check if bucket exists and credentials have access",
-        });
+      const testUploadCommand = new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: testKey,
+        Body: testContent,
+        ContentType: "text/plain",
+      });
+
+      console.log(`Attempting test upload to: ${process.env.R2_BUCKET_NAME}/${testKey}`);
+      await s3Client.send(testUploadCommand);
+      console.log("Test upload successful - R2 write access confirmed");
+      uploadTestPassed = true;
+      bucketAccessible = true;
+
+      // Try to verify the upload by attempting to access it
+      try {
+        const publicTestUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL
+          ? `${process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL}/${testKey}`
+          : `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${testKey}`;
+
+        console.log(`Test file should be accessible at: ${publicTestUrl}`);
+      } catch (verifyError) {
+        console.log("Could not verify test file URL, but upload succeeded");
       }
 
-      // For other errors, re-throw
-      throw listError;
+    } catch (uploadError: any) {
+      console.log("Upload test failed:", uploadError);
+
+      // Determine the type of error
+      if (uploadError.Code === 'NoSuchBucket' || uploadError.name === 'NoSuchBucket') {
+        return NextResponse.json({
+          status: "error",
+          message: "R2 bucket does not exist",
+          bucket: process.env.R2_BUCKET_NAME,
+          error: uploadError.message,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: new Date().toISOString(),
+        }, { status: 500 });
+      }
+
+      if (uploadError.Code === 'AccessDenied' || uploadError.name === 'AccessDenied') {
+        bucketAccessible = true; // We can reach the bucket but can't write
+        return NextResponse.json({
+          status: "error",
+          message: "R2 bucket exists but upload access denied",
+          bucket: process.env.R2_BUCKET_NAME,
+          bucketAccessible: true,
+          uploadAllowed: false,
+          error: uploadError.message,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: new Date().toISOString(),
+          recommendation: "API token lacks write permissions. Images may be served via different credentials.",
+        }, { status: 500 });
+      }
+
+      // Other errors
+      return NextResponse.json({
+        status: "error",
+        message: "R2 upload test failed",
+        bucket: process.env.R2_BUCKET_NAME,
+        error: uploadError.message,
+        nodeEnv: process.env.NODE_ENV,
+        timestamp: new Date().toISOString(),
+      }, { status: 500 });
     }
 
     return NextResponse.json({
       status: "success",
-      message: "R2 connection successful",
+      message: "R2 connection and upload capability verified",
       bucket: process.env.R2_BUCKET_NAME,
-      objectCount: listResult.KeyCount || 0,
+      bucketAccessible,
+      uploadTestPassed,
       nodeEnv: process.env.NODE_ENV,
       timestamp: new Date().toISOString(),
+      note: "If images display but uploads fail, check API token permissions vs custom domain access",
+      diagnostic: {
+        accessKeyPrefix: accessKey ? accessKey.substring(0, 8) : null,
+        secretKeyPrefix: secretKey ? secretKey.substring(0, 8) : null,
+        endpoint: process.env.R2_ENDPOINT,
+        customDomain: process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL,
+      },
     });
   } catch (error) {
     console.error("R2 connection test failed:", error);
