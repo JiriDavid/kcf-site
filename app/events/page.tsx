@@ -9,7 +9,7 @@ export default async function EventsPage() {
   return (
     <div className="space-y-16 lg:space-y-20">
       <section className="section-shell">
-        <div className="container space-y-10">
+        <div className="container space-y-10 pt-8 lg:pt-0">
           <SectionHeader
             eyebrow="Events"
             title="Gatherings that shape us"

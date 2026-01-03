@@ -52,7 +52,7 @@ export default function SermonsPage() {
   return (
     <div className="space-y-14 lg:space-y-20">
       <section className="section-shell">
-        <div className="container space-y-10">
+        <div className="container space-y-10 pt-8 lg:pt-0">
           <SectionHeader
             eyebrow="Sermons"
             title="Watch, listen, revisit"

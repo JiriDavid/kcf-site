@@ -13,7 +13,7 @@ export default function AboutPage() {
     <div className="space-y-12 sm:space-y-20 lg:space-y-28">
       <section className="section-shell">
         <div className="container section-grid">
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6 pt-8 lg:pt-0">
             <SectionHeader
               eyebrow="About"
               title="The story of KCF Fellowship"
