@@ -12,6 +12,7 @@ export default function SermonsPage() {
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string>("");
   const [playSignal, setPlaySignal] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     async function fetchSermons() {
@@ -38,11 +39,16 @@ export default function SermonsPage() {
 
   const handleWatch = (id: string) => {
     setActiveId(id);
+    setIsPlaying(true);
     setPlaySignal((n) => n + 1);
     const target = document.getElementById("featured-player");
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "center" });
     }
+  };
+
+  const handlePlayPause = () => {
+    setIsPlaying((prev) => !prev);
   };
 
   if (loading) {
@@ -64,8 +70,9 @@ export default function SermonsPage() {
             <div id="featured-player">
               <SermonPlayer
                 sermon={activeSermon}
-                isActive
+                isActive={isPlaying}
                 playSignal={playSignal}
+                onPlayPause={handlePlayPause}
               />
             </div>
           ) : null}

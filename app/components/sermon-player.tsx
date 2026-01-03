@@ -16,12 +16,14 @@ type Props = {
   sermon: Sermon;
   isActive?: boolean;
   playSignal?: number;
+  onPlayPause?: () => void;
 };
 
 export default function SermonPlayer({
   sermon,
   isActive = false,
   playSignal,
+  onPlayPause,
 }: Props) {
   const [isPlaying, setIsPlaying] = React.useState(false);
 
@@ -33,6 +35,14 @@ export default function SermonPlayer({
       setIsPlaying(false);
     }
   }, [isActive, playSignal]);
+
+  const handlePlayPause = () => {
+    if (onPlayPause) {
+      onPlayPause();
+    } else {
+      setIsPlaying((prev) => !prev);
+    }
+  };
 
   return (
     <Card id={`video-${sermon.id}`} className="w-full space-y-4">
@@ -60,7 +70,7 @@ export default function SermonPlayer({
           <Button
             type="button"
             variant="secondary"
-            onClick={() => setIsPlaying((prev) => !prev)}
+            onClick={handlePlayPause}
             className="inline-flex items-center gap-2"
           >
             {isPlaying ? (
