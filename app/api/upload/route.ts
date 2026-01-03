@@ -54,7 +54,11 @@ function validateFile(file: File, config: FileConfig): string | null {
 export async function POST(request: NextRequest) {
   try {
     // Validate required environment variables
-    if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !process.env.R2_BUCKET_NAME) {
+    if (
+      !process.env.R2_ACCESS_KEY_ID ||
+      !process.env.R2_SECRET_ACCESS_KEY ||
+      !process.env.R2_BUCKET_NAME
+    ) {
       console.error("Missing R2 configuration:", {
         hasAccessKey: !!process.env.R2_ACCESS_KEY_ID,
         hasSecretKey: !!process.env.R2_SECRET_ACCESS_KEY,
@@ -63,7 +67,10 @@ export async function POST(request: NextRequest) {
         endpoint: process.env.R2_ENDPOINT,
         customDomain: process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL,
       });
-      return NextResponse.json({ error: "R2 configuration incomplete" }, { status: 500 });
+      return NextResponse.json(
+        { error: "R2 configuration incomplete" },
+        { status: 500 }
+      );
     }
 
     const formData = await request.formData();
@@ -105,7 +112,9 @@ export async function POST(request: NextRequest) {
         // Note: Cloudflare R2 doesn't support ACLs - bucket must be configured for public access
       });
 
-      console.log(`Uploading file to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}`);
+      console.log(
+        `Uploading file to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}`
+      );
       await s3Client.send(uploadCommand);
       console.log(`Successfully uploaded file: ${keyWithFolder}`);
 
