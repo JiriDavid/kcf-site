@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "A worship-inspired hub for sermons, gallery moments, and events.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80",
+        url: "https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/events/choir-christmas-2.jpg",
         width: 1200,
         height: 630,
         alt: "KCF Fellowship",
