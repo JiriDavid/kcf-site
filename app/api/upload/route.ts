@@ -57,7 +57,15 @@ function validateFile(file: File, config: FileConfig): string | null {
 
 export async function GET() {
   try {
-    console.log("Testing R2 connection...");
+    console.log("R2 configuration check:", {
+      hasAccessKey: !!process.env.R2_ACCESS_KEY_ID,
+      hasSecretKey: !!process.env.R2_SECRET_ACCESS_KEY,
+      bucketName: process.env.R2_BUCKET_NAME,
+      endpoint: process.env.R2_ENDPOINT,
+      region: process.env.R2_REGION || "auto",
+      customDomain: process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL,
+      nodeEnv: process.env.NODE_ENV,
+    });
 
     // Validate required environment variables
     const requiredEnvVars = {
@@ -90,7 +98,35 @@ export async function GET() {
     });
 
     console.log("Testing R2 list operation...");
-    const listResult = await s3Client.send(listCommand);
+    let listResult;
+    try {
+      listResult = await s3Client.send(listCommand);
+      console.log("R2 list operation successful");
+    } catch (listError: any) {
+      console.log("List operation error:", listError);
+
+      // If the error indicates we can reach R2 but bucket is empty/inaccessible
+      if (
+        listError.Code === "NoSuchKey" ||
+        listError.Code === "NoSuchBucket" ||
+        listError.name === "NoSuchKey" ||
+        listError.name === "NoSuchBucket"
+      ) {
+        console.log("R2 reachable but bucket issue detected");
+        return NextResponse.json({
+          status: "partial",
+          message: "R2 connection works but bucket may not exist or be empty",
+          bucket: process.env.R2_BUCKET_NAME,
+          error: listError.message,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: new Date().toISOString(),
+          recommendation: "Check if bucket exists and credentials have access",
+        });
+      }
+
+      // For other errors, re-throw
+      throw listError;
+    }
 
     return NextResponse.json({
       status: "success",
