@@ -124,7 +124,10 @@ export default function AdminDashboard() {
       // Handle file uploads first
       let uploadedUrls: string[] = [];
       const files = data.getAll("files") as File[];
-      if (files.length > 0) {
+      const hasFilesToUpload = files.some(file => file.size > 0);
+
+      if (hasFilesToUpload) {
+        console.log(`Attempting to upload ${files.length} files`);
         setUploadProgress("Uploading event media...");
         const uploadFormData = new FormData();
         uploadFormData.append("type", "events");
@@ -134,23 +137,30 @@ export default function AdminDashboard() {
           }
         });
 
-        if (uploadFormData.has("files")) {
-          const uploadResponse = await fetch("/api/upload", {
-            method: "POST",
-            body: uploadFormData,
-          });
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
 
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json();
-            throw new Error(errorData.error || "Failed to upload files");
-          }
+        console.log("Upload response status:", uploadResponse.status);
 
-          const uploadResult = await uploadResponse.json();
-          uploadedUrls = uploadResult.urls;
-          setUploadProgress(
-            `Uploaded ${uploadResult.count} file${uploadResult.count > 1 ? "s" : ""}`
-          );
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          console.error("Upload failed:", errorData);
+          throw new Error(errorData.error || "Failed to upload files");
         }
+
+        const uploadResult = await uploadResponse.json();
+        console.log("Upload result:", uploadResult);
+        uploadedUrls = uploadResult.urls || [];
+
+        if (uploadedUrls.length === 0) {
+          throw new Error("Upload completed but no file URLs were returned");
+        }
+
+        setUploadProgress(
+          `Uploaded ${uploadResult.count} file${uploadResult.count > 1 ? "s" : ""}`
+        );
       }
 
       // Use uploaded file URL or provided URL
