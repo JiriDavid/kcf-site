@@ -124,7 +124,7 @@ export default function AdminDashboard() {
       // Handle file uploads first
       let uploadedUrls: string[] = [];
       const files = data.getAll("files") as File[];
-      const hasFilesToUpload = files.some(file => file.size > 0);
+      const hasFilesToUpload = files.some((file) => file.size > 0);
 
       if (hasFilesToUpload) {
         console.log(`Attempting to upload ${files.length} files`);

@@ -1,6 +1,10 @@
 // app/api/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+} from "@aws-sdk/client-s3";
 
 // Initialize S3 client for Cloudflare R2
 const s3Client = new S3Client({
@@ -68,12 +72,15 @@ export async function GET() {
       .map(([key]) => key);
 
     if (missingVars.length > 0) {
-      return NextResponse.json({
-        status: "error",
-        message: "Missing environment variables",
-        missing: missingVars,
-        nodeEnv: process.env.NODE_ENV,
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          status: "error",
+          message: "Missing environment variables",
+          missing: missingVars,
+          nodeEnv: process.env.NODE_ENV,
+        },
+        { status: 500 }
+      );
     }
 
     // Test connection by listing objects
@@ -93,16 +100,18 @@ export async function GET() {
       nodeEnv: process.env.NODE_ENV,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error("R2 connection test failed:", error);
-    return NextResponse.json({
-      status: "error",
-      message: "R2 connection failed",
-      error: error instanceof Error ? error.message : 'Unknown error',
-      nodeEnv: process.env.NODE_ENV,
-      timestamp: new Date().toISOString(),
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        status: "error",
+        message: "R2 connection failed",
+        error: error instanceof Error ? error.message : "Unknown error",
+        nodeEnv: process.env.NODE_ENV,
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -131,7 +140,9 @@ export async function POST(request: NextRequest) {
         nodeEnv: process.env.NODE_ENV,
       });
       return NextResponse.json(
-        { error: `R2 configuration incomplete. Missing: ${missingVars.join(", ")}` },
+        {
+          error: `R2 configuration incomplete. Missing: ${missingVars.join(", ")}`,
+        },
         { status: 500 }
       );
     }
@@ -142,7 +153,9 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll("files") as File[];
     const uploadType = (formData.get("type") as UploadType) || "gallery";
 
-    console.log(`Processing upload request: ${files.length} files, type: ${uploadType}`);
+    console.log(
+      `Processing upload request: ${files.length} files, type: ${uploadType}`
+    );
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "No files provided" }, { status: 400 });
@@ -159,7 +172,9 @@ export async function POST(request: NextRequest) {
     const uploadedUrls: string[] = [];
 
     for (const file of files) {
-      console.log(`Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`);
+      console.log(
+        `Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`
+      );
 
       // Validate file
       const validationError = validateFile(file, config);
@@ -190,19 +205,24 @@ export async function POST(request: NextRequest) {
           // Note: Cloudflare R2 doesn't support ACLs - bucket must be configured for public access
         });
 
-        console.log(`Sending upload command to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}, ContentType=${file.type}`);
+        console.log(
+          `Sending upload command to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}, ContentType=${file.type}`
+        );
 
         const uploadStartTime = Date.now();
         const uploadResult = await s3Client.send(uploadCommand);
         const uploadDuration = Date.now() - uploadStartTime;
 
-        console.log(`Successfully uploaded file: ${keyWithFolder} in ${uploadDuration}ms`);
+        console.log(
+          `Successfully uploaded file: ${keyWithFolder} in ${uploadDuration}ms`
+        );
         console.log("Upload result:", uploadResult);
-
       } catch (uploadError) {
         console.error(`Failed to upload file ${file.name}:`, uploadError);
         return NextResponse.json(
-          { error: `Failed to upload ${file.name}: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}` },
+          {
+            error: `Failed to upload ${file.name}: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`,
+          },
           { status: 500 }
         );
       }
@@ -221,7 +241,9 @@ export async function POST(request: NextRequest) {
       uploadedUrls.push(publicUrl);
     }
 
-    console.log(`Upload completed successfully. Total files: ${uploadedUrls.length}`);
+    console.log(
+      `Upload completed successfully. Total files: ${uploadedUrls.length}`
+    );
 
     return NextResponse.json({
       success: true,
@@ -230,7 +252,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Upload API error:", {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       nodeEnv: process.env.NODE_ENV,
       timestamp: new Date().toISOString(),
@@ -239,8 +261,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to upload files",
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        details: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
