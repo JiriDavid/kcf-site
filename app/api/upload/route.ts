@@ -53,6 +53,19 @@ function validateFile(file: File, config: FileConfig): string | null {
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate required environment variables
+    if (!process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !process.env.R2_BUCKET_NAME) {
+      console.error("Missing R2 configuration:", {
+        hasAccessKey: !!process.env.R2_ACCESS_KEY_ID,
+        hasSecretKey: !!process.env.R2_SECRET_ACCESS_KEY,
+        hasBucketName: !!process.env.R2_BUCKET_NAME,
+        hasAccountId: !!process.env.R2_ACCOUNT_ID,
+        endpoint: process.env.R2_ENDPOINT,
+        customDomain: process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL,
+      });
+      return NextResponse.json({ error: "R2 configuration incomplete" }, { status: 500 });
+    }
+
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
     const uploadType = (formData.get("type") as UploadType) || "gallery";
@@ -78,23 +91,35 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: validationError }, { status: 400 });
       }
 
-      // Generate unique filename
+      // Generate unique filename with folder prefix
       const fileExtension = file.name.split(".").pop();
-      const uniqueName = `${config.folder}${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+      const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+      const keyWithFolder = `${config.folder}${uniqueName}`;
 
       // Upload to R2
       const uploadCommand = new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME!,
-        Key: uniqueName,
+        Key: keyWithFolder,
         Body: Buffer.from(await file.arrayBuffer()),
         ContentType: file.type,
-        ACL: "public-read", // Make files publicly accessible
+        // Note: Cloudflare R2 doesn't support ACLs - bucket must be configured for public access
       });
 
+      console.log(`Uploading file to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}`);
       await s3Client.send(uploadCommand);
+      console.log(`Successfully uploaded file: ${keyWithFolder}`);
 
-      // Generate public URL
-      const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL}/${uniqueName}`;
+      // Generate public URL - use custom domain if available, otherwise standard R2 URL
+      let publicUrl: string;
+      if (process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL) {
+        publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL}/${keyWithFolder}`;
+      } else {
+        // Fallback to standard R2 URL
+        const accountId = process.env.R2_ACCOUNT_ID;
+        const bucketName = process.env.R2_BUCKET_NAME;
+        publicUrl = `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${keyWithFolder}`;
+      }
+      console.log(`Generated public URL: ${publicUrl}`);
       uploadedUrls.push(publicUrl);
     }
 
