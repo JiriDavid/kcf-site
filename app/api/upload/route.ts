@@ -63,8 +63,18 @@ export async function GET() {
     const accessKey = process.env.R2_ACCESS_KEY_ID;
     const secretKey = process.env.R2_SECRET_ACCESS_KEY;
 
-    console.log("Access Key ID:", accessKey ? `${accessKey.substring(0, 4)}...${accessKey.substring(accessKey.length - 4)}` : "NOT SET");
-    console.log("Secret Key:", secretKey ? `${secretKey.substring(0, 4)}...${secretKey.substring(secretKey.length - 4)}` : "NOT SET");
+    console.log(
+      "Access Key ID:",
+      accessKey
+        ? `${accessKey.substring(0, 4)}...${accessKey.substring(accessKey.length - 4)}`
+        : "NOT SET"
+    );
+    console.log(
+      "Secret Key:",
+      secretKey
+        ? `${secretKey.substring(0, 4)}...${secretKey.substring(secretKey.length - 4)}`
+        : "NOT SET"
+    );
     console.log("Bucket Name:", process.env.R2_BUCKET_NAME);
     console.log("Endpoint:", process.env.R2_ENDPOINT);
     console.log("Node Environment:", process.env.NODE_ENV);
@@ -126,7 +136,9 @@ export async function GET() {
         ContentType: "text/plain",
       });
 
-      console.log(`Attempting test upload to: ${process.env.R2_BUCKET_NAME}/${testKey}`);
+      console.log(
+        `Attempting test upload to: ${process.env.R2_BUCKET_NAME}/${testKey}`
+      );
       await s3Client.send(testUploadCommand);
       console.log("Test upload successful - R2 write access confirmed");
       uploadTestPassed = true;
@@ -142,46 +154,61 @@ export async function GET() {
       } catch (verifyError) {
         console.log("Could not verify test file URL, but upload succeeded");
       }
-
     } catch (uploadError: any) {
       console.log("Upload test failed:", uploadError);
 
       // Determine the type of error
-      if (uploadError.Code === 'NoSuchBucket' || uploadError.name === 'NoSuchBucket') {
-        return NextResponse.json({
-          status: "error",
-          message: "R2 bucket does not exist",
-          bucket: process.env.R2_BUCKET_NAME,
-          error: uploadError.message,
-          nodeEnv: process.env.NODE_ENV,
-          timestamp: new Date().toISOString(),
-        }, { status: 500 });
+      if (
+        uploadError.Code === "NoSuchBucket" ||
+        uploadError.name === "NoSuchBucket"
+      ) {
+        return NextResponse.json(
+          {
+            status: "error",
+            message: "R2 bucket does not exist",
+            bucket: process.env.R2_BUCKET_NAME,
+            error: uploadError.message,
+            nodeEnv: process.env.NODE_ENV,
+            timestamp: new Date().toISOString(),
+          },
+          { status: 500 }
+        );
       }
 
-      if (uploadError.Code === 'AccessDenied' || uploadError.name === 'AccessDenied') {
+      if (
+        uploadError.Code === "AccessDenied" ||
+        uploadError.name === "AccessDenied"
+      ) {
         bucketAccessible = true; // We can reach the bucket but can't write
-        return NextResponse.json({
-          status: "error",
-          message: "R2 bucket exists but upload access denied",
-          bucket: process.env.R2_BUCKET_NAME,
-          bucketAccessible: true,
-          uploadAllowed: false,
-          error: uploadError.message,
-          nodeEnv: process.env.NODE_ENV,
-          timestamp: new Date().toISOString(),
-          recommendation: "API token lacks write permissions. Images may be served via different credentials.",
-        }, { status: 500 });
+        return NextResponse.json(
+          {
+            status: "error",
+            message: "R2 bucket exists but upload access denied",
+            bucket: process.env.R2_BUCKET_NAME,
+            bucketAccessible: true,
+            uploadAllowed: false,
+            error: uploadError.message,
+            nodeEnv: process.env.NODE_ENV,
+            timestamp: new Date().toISOString(),
+            recommendation:
+              "API token lacks write permissions. Images may be served via different credentials.",
+          },
+          { status: 500 }
+        );
       }
 
       // Other errors
-      return NextResponse.json({
-        status: "error",
-        message: "R2 upload test failed",
-        bucket: process.env.R2_BUCKET_NAME,
-        error: uploadError.message,
-        nodeEnv: process.env.NODE_ENV,
-        timestamp: new Date().toISOString(),
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          status: "error",
+          message: "R2 upload test failed",
+          bucket: process.env.R2_BUCKET_NAME,
+          error: uploadError.message,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
