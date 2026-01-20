@@ -35,7 +35,7 @@ export default function SermonsPage() {
 
   const activeSermon = useMemo(
     () => sermons.find((s) => s.id === activeId) ?? sermons[0],
-    [activeId, sermons]
+    [activeId, sermons],
   );
 
   const handleWatch = (id: string) => {

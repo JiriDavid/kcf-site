@@ -40,7 +40,7 @@ export default function GalleryGrid() {
               image: item.src,
               folder: item.folder,
               title: item.title,
-            }))
+            })),
           );
         }
       } catch (err) {

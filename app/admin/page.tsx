@@ -44,7 +44,7 @@ export default function AdminDashboard() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editingSermon, setEditingSermon] = useState<Sermon | null>(null);
   const [editingGallery, setEditingGallery] = useState<GalleryItem | null>(
-    null
+    null,
   );
   const [uploadProgress, setUploadProgress] = useState<string>("");
 
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
       sermons: sermons.length,
       gallery: gallery.length,
     }),
-    [events.length, sermons.length, gallery.length]
+    [events.length, sermons.length, gallery.length],
   );
 
   // Check authentication
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
         }
 
         setUploadProgress(
-          `Uploaded ${uploadResult.count} file${uploadResult.count > 1 ? "s" : ""}`
+          `Uploaded ${uploadResult.count} file${uploadResult.count > 1 ? "s" : ""}`,
         );
       }
 
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
           ? uploadedUrls[0] // Use first uploaded file as main image
           : String(
               data.get("image") ||
-                "https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1200&q=80"
+                "https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1200&q=80",
             );
 
       const newEvent = {
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to create event"
+        error instanceof Error ? error.message : "Failed to create event",
       );
       setUploadProgress("");
     } finally {
@@ -230,7 +230,7 @@ export default function AdminDashboard() {
         uploadPromises.push(
           fetch("/api/upload", { method: "POST", body: uploadFormData })
             .then((res) => res.json())
-            .then((result) => ({ type: "thumbnail", urls: result.urls }))
+            .then((result) => ({ type: "thumbnail", urls: result.urls })),
         );
       }
 
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
         uploadPromises.push(
           fetch("/api/upload", { method: "POST", body: uploadFormData })
             .then((res) => res.json())
-            .then((result) => ({ type: "video", urls: result.urls }))
+            .then((result) => ({ type: "video", urls: result.urls })),
         );
       }
 
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
         uploadPromises.push(
           fetch("/api/upload", { method: "POST", body: uploadFormData })
             .then((res) => res.json())
-            .then((result) => ({ type: "audio", urls: result.urls }))
+            .then((result) => ({ type: "audio", urls: result.urls })),
         );
       }
 
@@ -269,7 +269,7 @@ export default function AdminDashboard() {
         uploadPromises.push(
           fetch("/api/upload", { method: "POST", body: uploadFormData })
             .then((res) => res.json())
-            .then((result) => ({ type: "notes", urls: result.urls }))
+            .then((result) => ({ type: "notes", urls: result.urls })),
         );
       }
 
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
       });
 
       setUploadProgress(
-        `Uploaded ${Object.keys(uploadedUrls).length} file${Object.keys(uploadedUrls).length > 1 ? "s" : ""}`
+        `Uploaded ${Object.keys(uploadedUrls).length} file${Object.keys(uploadedUrls).length > 1 ? "s" : ""}`,
       );
 
       const newSermon = {
@@ -300,13 +300,13 @@ export default function AdminDashboard() {
           uploadedUrls.video ||
           String(
             data.get("videoUrl") ||
-              "https://storage.googleapis.com/coverr-main/mp4%2FMovement.mp4"
+              "https://storage.googleapis.com/coverr-main/mp4%2FMovement.mp4",
           ),
         audioUrl:
           uploadedUrls.audio ||
           String(
             data.get("audioUrl") ||
-              "https://r2.example.com/kcf-media/audio/sample.mp3"
+              "https://r2.example.com/kcf-media/audio/sample.mp3",
           ),
         notesUrl:
           uploadedUrls.notes ||
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
           uploadedUrls.thumbnail ||
           String(
             data.get("thumbnail") ||
-              "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
+              "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
           ),
       };
 
@@ -338,7 +338,7 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error creating sermon:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to create sermon"
+        error instanceof Error ? error.message : "Failed to create sermon",
       );
       setUploadProgress("");
     } finally {
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
           const uploadResult = await uploadResponse.json();
           imageUrls = imageUrls.concat(uploadResult.urls);
           setUploadProgress(
-            `Uploaded ${uploadResult.count} file${uploadResult.count > 1 ? "s" : ""} successfully`
+            `Uploaded ${uploadResult.count} file${uploadResult.count > 1 ? "s" : ""} successfully`,
           );
         }
       }
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
         setGallery((prev) => [...createdItems, ...prev]);
         form.reset();
         toast.success(
-          `${createdItems.length} gallery item${createdItems.length > 1 ? "s" : ""} created successfully`
+          `${createdItems.length} gallery item${createdItems.length > 1 ? "s" : ""} created successfully`,
         );
         setUploadProgress("");
       } else {
@@ -437,7 +437,7 @@ export default function AdminDashboard() {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to create gallery items"
+          : "Failed to create gallery items",
       );
       setUploadProgress("");
     } finally {
@@ -457,7 +457,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         const updatedEvent = await response.json();
         setEvents((prev) =>
-          prev.map((e) => (e._id === event._id ? updatedEvent : e))
+          prev.map((e) => (e._id === event._id ? updatedEvent : e)),
         );
         setEditingEvent(null);
         toast.success("Event updated successfully");
@@ -504,7 +504,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         const updatedSermon = await response.json();
         setSermons((prev) =>
-          prev.map((s) => (s._id === sermon._id ? updatedSermon : s))
+          prev.map((s) => (s._id === sermon._id ? updatedSermon : s)),
         );
         setEditingSermon(null);
         toast.success("Sermon updated successfully");
@@ -551,7 +551,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         const updatedItem = await response.json();
         setGallery((prev) =>
-          prev.map((g) => (g._id === item._id ? updatedItem : g))
+          prev.map((g) => (g._id === item._id ? updatedItem : g)),
         );
         setEditingGallery(null);
         toast.success("Gallery item updated successfully");
@@ -1018,14 +1018,14 @@ function AdminForm({
                         const file = files[i];
                         if (file.size > 10 * 1024 * 1024) {
                           alert(
-                            `File "${file.name}" is too large. Maximum size is 10MB.`
+                            `File "${file.name}" is too large. Maximum size is 10MB.`,
                           );
                           e.target.value = "";
                           return;
                         }
                         if (!file.type.startsWith("image/")) {
                           alert(
-                            `File "${file.name}" is not an image. Please select image files only.`
+                            `File "${file.name}" is not an image. Please select image files only.`,
                           );
                           e.target.value = "";
                           return;
