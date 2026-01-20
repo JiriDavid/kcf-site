@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
 import { events as staticEvents } from "@/lib/static-data";
 import EventCard from "./event-card";
+import Loading from "./ui/loading";
 import { useState, useEffect } from "react";
 import { Event } from "@/types";
 
@@ -42,7 +43,7 @@ export default function EventsCarousel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-white">Loading events...</div>
+        <Loading />
       </div>
     );
   }

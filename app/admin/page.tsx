@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Event, Sermon, GalleryItem } from "@/types";
 import SectionHeader from "@/app/components/section-header";
+import Loading from "@/app/components/ui/loading";
 import {
   Card,
   CardContent,
@@ -102,7 +103,7 @@ export default function AdminDashboard() {
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+        <Loading />
       </div>
     );
   }

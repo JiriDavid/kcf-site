@@ -14,6 +14,9 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "KCF Fellowship | Worship. Grow. Impact.",
+  icons: {
+    icon: "/favicon.ico",
+  },
   description:
     "KCF Fellowship — Worship, Word, and Impact. Experience immersive sermons, events, and stories of faith.",
   openGraph: {

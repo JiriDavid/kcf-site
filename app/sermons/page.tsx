@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import SectionHeader from "../components/section-header";
 import SermonCard from "../components/sermon-card";
 import SermonPlayer from "../components/sermon-player";
+import Loading from "../components/ui/loading";
 import { Sermon } from "@/types";
 
 export default function SermonsPage() {
@@ -52,7 +53,7 @@ export default function SermonsPage() {
   };
 
   if (loading) {
-    return <div>Loading sermons...</div>;
+    return <Loading />;
   }
 
   return (

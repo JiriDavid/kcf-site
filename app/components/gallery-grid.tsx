@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import GalleryCard, { GalleryMedia } from "./gallery-card";
+import Loading from "./ui/loading";
 import { Button } from "@/app/components/ui/button";
 
 type GalleryItem = GalleryMedia & { folder: Folder; title: string };
@@ -68,7 +69,7 @@ export default function GalleryGrid() {
   const itemsToShow = filtered.slice(0, visible);
 
   if (loading) {
-    return <p className="text-sm text-foreground/70">Loading gallery…</p>;
+    return <Loading />;
   }
 
   if (error) {

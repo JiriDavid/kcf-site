@@ -74,7 +74,7 @@ export default async function Home() {
           <SectionHeader
             eyebrow="Mission & Vision"
             title="Jesus at the center — every generation on mission"
-            description="Our dream is to see disciples who worship deeply, think biblically, and love boldly across campuses and cities."
+            description="Our mission is to create true worshipers who worship the Father in spirit and truth. John 4:23-24"
             align="center"
           />
           <div className="grid gap-6 lg:grid-cols-3">
