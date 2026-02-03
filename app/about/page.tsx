@@ -137,7 +137,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="section-shel">
+      {/* <section className="section-shel">
         <div className="container section-grid">
           <div className="space-y-4">
             <SectionHeader
@@ -152,7 +152,7 @@ export default function AboutPage() {
           </div>
           <Timeline />
         </div>
-      </section>
+      </section> */}
 
       <section className="section-shel">
         <div className="container space-y-8 mb-4 lg:mb-16">
