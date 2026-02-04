@@ -13,6 +13,16 @@ export async function getEvents(): Promise<Event[]> {
   }
 }
 
+export async function getEventById(id: string): Promise<Event | null> {
+  try {
+    const db = await getDb();
+    return await db.collection<Event>("events").findOne({ id });
+  } catch (error) {
+    console.error("Error fetching event:", error);
+    return null;
+  }
+}
+
 export async function getSermons(): Promise<Sermon[]> {
   try {
     const db = await getDb();

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Event } from "@/types";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -36,10 +37,11 @@ export default function EventCard({ event }: { event: Event }) {
         </div>
         <div className="pt-1">
           <Button
+            asChild
             variant="outline"
             className="w-full justify-center text-white"
           >
-            View Details
+            <Link href={`/events/${event.id}`}>View Details</Link>
           </Button>
         </div>
       </div>

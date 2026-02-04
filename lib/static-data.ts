@@ -52,7 +52,7 @@ export const heroSlides: {
 
 export const stats = [
   { label: "Years of discipleship", value: 4 },
-  { label: "Nationalities represented", value: 10 },
+  { label: "Nationalities represented", value: 13 },
   { label: "Average monthly new members", value: 5 },
 ];
 
@@ -131,10 +131,10 @@ export const events = [
 
 export const leaders = [
   {
-    name: "Joyceline Nchebi.",
+    name: "Joysline Nchebi.",
     role: "Chairperson",
     phone: "+91 760 898 3468",
-    email: "joyceline.nchebi@example.com",
+    email: "joaza600@gmail.com",
   },
   {
     name: "Collete.",
@@ -146,6 +146,6 @@ export const leaders = [
     name: "Fully Johnson.",
     role: "Secretary General",
     phone: "+231 886 679 469",
-    email: "fully.johnson@example.com",
+    email: "fullyjohnsons19@gmail.com",
   },
 ];

@@ -84,10 +84,10 @@ export default function Footer() {
           <p className="text-sm text-white">
             Midweek Intercession · Wednesdays 5:00 PM
           </p>
-          <p className="text-xs text-foreground/50">
+          {/* <p className="text-xs text-foreground/50">
             Cloudflare R2 placeholders for all media links are configured for
             future integration.
-          </p>
+          </p> */}
         </div>
       </div>
       <div className="border-t border-white/5 py-4 text-center text-xs text-white">
