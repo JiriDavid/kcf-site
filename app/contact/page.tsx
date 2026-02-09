@@ -90,7 +90,7 @@ export default function ContactPage() {
                         </a>
                         <a
                           className="flex items-center gap-2 hover:text-primary"
-                          href="https://wa.me"
+                          href={`https://wa.me/${leader.phone.slice(1).replace(/\s+/g, '')}`} // Assuming phone is in format "+1234567890" 
                           target="_blank"
                           rel="noreferrer"
                         >

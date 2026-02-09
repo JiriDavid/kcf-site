@@ -140,7 +140,7 @@ export const leaders = [
     name: "Collete.",
     role: "Administrator",
     phone: "+91 760 591 2067",
-    email: "collete@example.com",
+    email: " etampicollete@gmail.com",
   },
   {
     name: "Fully Johnson.",
