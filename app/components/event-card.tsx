@@ -13,6 +13,7 @@ export default function EventCard({ event }: { event: Event }) {
           src={event.image}
           alt={event.title}
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="object-cover transition duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

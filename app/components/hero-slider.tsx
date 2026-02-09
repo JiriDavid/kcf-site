@@ -32,6 +32,7 @@ export default function HeroSlider() {
                 .replace(".mp4", ".jpg")}
               alt={heroSlides[0].title}
               fill
+              sizes="100vw"
               className="object-cover"
               priority
             />
@@ -40,6 +41,7 @@ export default function HeroSlider() {
               src={heroSlides[0].src}
               alt={heroSlides[0].title}
               fill
+              sizes="100vw"
               className="object-cover"
               priority
             />
@@ -115,6 +117,7 @@ export default function HeroSlider() {
                     src={slide.src}
                     alt={slide.title}
                     fill
+                    sizes="100vw"
                     className="object-cover"
                     priority
                   />
@@ -144,7 +147,7 @@ export default function HeroSlider() {
                             variant={idx === 0 ? "secondary" : "outline"}
                             size="lg"
                             className={cn(
-                              idx === 0 ? "shadow-glow" : "text-white"
+                              idx === 0 ? "shadow-glow" : "text-white",
                             )}
                           >
                             <Link href={cta.href}>{cta.label}</Link>

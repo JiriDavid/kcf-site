@@ -52,6 +52,7 @@ export default async function Home() {
               src={`${R2_PLACEHOLDER}/kcf-images/kcf-1.jpg`}
               alt="Fellowship"
               fill
+              sizes="(max-width: 640px) 100vw, 50vw"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/10 to-black/80" />
@@ -159,6 +160,7 @@ export default async function Home() {
               src="https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/kcf-images/congregation-christmas.jpg"
               alt="Gallery highlight"
               fill
+              sizes="100vw"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/20 to-black/70" />
