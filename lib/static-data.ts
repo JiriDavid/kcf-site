@@ -93,6 +93,7 @@ export const events = [
     image:
       "https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/events/2025-orphanage-visit.jpg",
     category: "Charity",
+    reviewed: true,
   },
   {
     id: "e2",
@@ -104,6 +105,7 @@ export const events = [
     image:
       "https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/events/open-sky-gathering.jpg",
     category: "Picnic",
+    reviewed: true,
   },
   {
     id: "e3",
@@ -115,6 +117,7 @@ export const events = [
     image:
       "https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/events/zoo-tour-2.jpg",
     category: "Adventure",
+    reviewed: true,
   },
   {
     id: "e4",
@@ -126,6 +129,18 @@ export const events = [
     image:
       "https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/events/congregation-christmas-4.jpg",
     category: "Christmas",
+    reviewed: true,
+  },
+  {
+    id: "e5",
+    title: "Special Guest Speaker Event",
+    date: "2026-03-15",
+    location: "KIIT Auditorium",
+    description: "An inspiring session with a special guest speaker.",
+    image:
+      "https://pub-c71ef7045fff4c60aeb28ca64b9a6508.r2.dev/events/1768492132020-q2ek6sh0h3.jpg",
+    category: "Special Event",
+    reviewed: false, // Mysterious event
   },
 ];
 

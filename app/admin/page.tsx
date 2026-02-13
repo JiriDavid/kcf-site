@@ -180,6 +180,7 @@ export default function AdminDashboard() {
         description: String(data.get("description") || ""),
         image: imageUrl,
         category: (data.get("category") as Event["category"]) || "Conference",
+        reviewed: data.get("reviewed") === "on",
         featured: false,
         // Store additional uploaded files if any
         mediaUrls: uploadedUrls.length > 1 ? uploadedUrls.slice(1) : undefined,
@@ -481,7 +482,7 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        setEvents((prev) => prev.filter((e) => e._id !== id));
+        setEvents((prev) => prev.filter((e) => e.id !== id));
         toast.success("Event deleted successfully");
       } else {
         throw new Error("Failed to delete event");
@@ -528,7 +529,7 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        setSermons((prev) => prev.filter((s) => s._id !== id));
+        setSermons((prev) => prev.filter((s) => s.id !== id));
         toast.success("Sermon deleted successfully");
       } else {
         throw new Error("Failed to delete sermon");
@@ -575,7 +576,7 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        setGallery((prev) => prev.filter((g) => g._id !== id));
+        setGallery((prev) => prev.filter((g) => g.id !== id));
         toast.success("Gallery item deleted successfully");
       } else {
         throw new Error("Failed to delete gallery item");
@@ -647,6 +648,7 @@ export default function AdminDashboard() {
                           "Prayer",
                           "Retreat",
                           "Sunday",
+                          "Picnic",
                         ],
                       },
                       {
@@ -669,6 +671,13 @@ export default function AdminDashboard() {
                         label: "Description",
                         type: "textarea",
                       },
+                      {
+                        name: "reviewed",
+                        label: "Event details are reviewed and public",
+                        type: "checkbox",
+                        description:
+                          "Uncheck to make this a mysterious event with hidden details",
+                      },
                     ]}
                     cta="Add event"
                   />
@@ -681,7 +690,7 @@ export default function AdminDashboard() {
                       e.location,
                     ])}
                     onEdit={(index) => setEditingEvent(events[index])}
-                    onDelete={(index) => handleEventDelete(events[index]._id!)}
+                    onDelete={(index) => handleEventDelete(events[index].id)}
                   />
                 </TabsContent>
 
@@ -776,9 +785,7 @@ export default function AdminDashboard() {
                       s.speaker,
                     ])}
                     onEdit={(index) => setEditingSermon(sermons[index])}
-                    onDelete={(index) =>
-                      handleSermonDelete(sermons[index]._id!)
-                    }
+                    onDelete={(index) => handleSermonDelete(sermons[index].id)}
                   />
                 </TabsContent>
 
@@ -843,9 +850,7 @@ export default function AdminDashboard() {
                       g.image,
                     ])}
                     onEdit={(index) => setEditingGallery(gallery[index])}
-                    onDelete={(index) =>
-                      handleGalleryDelete(gallery[index]._id!)
-                    }
+                    onDelete={(index) => handleGalleryDelete(gallery[index].id)}
                   />
                 </TabsContent>
               </Tabs>
@@ -955,6 +960,13 @@ type Field =
       type: "select";
       options: string[];
       required?: boolean;
+    }
+  | {
+      name: string;
+      label: string;
+      type: "checkbox";
+      required?: boolean;
+      description?: string;
     };
 
 function AdminForm({
@@ -1062,6 +1074,27 @@ function AdminForm({
                     </option>
                   ))}
                 </select>
+              </div>
+            );
+          }
+          if (field.type === "checkbox") {
+            return (
+              <div key={field.name} className="md:col-span-2 space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type="checkbox"
+                    defaultChecked={true}
+                    className="rounded border-white/20 bg-white/5"
+                  />
+                  <span className="text-sm text-foreground/80">
+                    {field.label}
+                  </span>
+                </label>
+                {field.description && (
+                  <p className="text-xs text-white/60">{field.description}</p>
+                )}
               </div>
             );
           }
@@ -1188,6 +1221,7 @@ function EditEventForm({
       image: String(formData.get("image") || event.image),
       category:
         (formData.get("category") as Event["category"]) || event.category,
+      reviewed: formData.get("reviewed") === "on",
     };
     onSave(updatedEvent);
   };
@@ -1233,6 +1267,22 @@ function EditEventForm({
             defaultValue={event.description}
             required
           />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="reviewed"
+              defaultChecked={event.reviewed ?? true}
+              className="rounded border-white/20 bg-white/5"
+            />
+            <span className="text-sm font-medium">
+              Event details are reviewed and public
+            </span>
+          </label>
+          <p className="text-xs text-white/60 mt-1">
+            Uncheck to make this a mysterious event with hidden details
+          </p>
         </div>
       </div>
       <div className="flex gap-2">

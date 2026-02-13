@@ -29,6 +29,7 @@ export type Event = {
   description: string;
   image: string;
   category: string;
+  reviewed?: boolean; // Whether the event details are fully reviewed and public
 };
 
 export type GalleryItem = {
