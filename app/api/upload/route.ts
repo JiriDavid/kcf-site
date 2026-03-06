@@ -17,7 +17,8 @@ const s3Client = new S3Client({
 
 function getPublicBaseUrl() {
   const value =
-    process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ?? process.env.R2_PUBLIC_BASE_URL;
+    process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ??
+    process.env.R2_PUBLIC_BASE_URL;
 
   if (!value) {
     return null;
@@ -56,7 +57,7 @@ function validateFile(file: File, config: FileConfig): string | null {
 
   // Check file type
   const isAllowedType = config.allowedTypes.some((type) =>
-    file.type.startsWith(type)
+    file.type.startsWith(type),
   );
   if (!isAllowedType) {
     return `File ${file.name} has unsupported type. Allowed: ${config.allowedTypes.join(", ")}`;
@@ -77,13 +78,13 @@ export async function GET() {
       "Access Key ID:",
       accessKey
         ? `${accessKey.substring(0, 4)}...${accessKey.substring(accessKey.length - 4)}`
-        : "NOT SET"
+        : "NOT SET",
     );
     console.log(
       "Secret Key:",
       secretKey
         ? `${secretKey.substring(0, 4)}...${secretKey.substring(secretKey.length - 4)}`
-        : "NOT SET"
+        : "NOT SET",
     );
     console.log("Bucket Name:", process.env.R2_BUCKET_NAME);
     console.log("Endpoint:", process.env.R2_ENDPOINT);
@@ -129,7 +130,7 @@ export async function GET() {
             endpoint: process.env.R2_ENDPOINT,
           },
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -150,7 +151,7 @@ export async function GET() {
       });
 
       console.log(
-        `Attempting test upload to: ${process.env.R2_BUCKET_NAME}/${testKey}`
+        `Attempting test upload to: ${process.env.R2_BUCKET_NAME}/${testKey}`,
       );
       await s3Client.send(testUploadCommand);
       console.log("Test upload successful - R2 write access confirmed");
@@ -185,7 +186,7 @@ export async function GET() {
             nodeEnv: process.env.NODE_ENV,
             timestamp: new Date().toISOString(),
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -207,7 +208,7 @@ export async function GET() {
             recommendation:
               "API token lacks write permissions. Images may be served via different credentials.",
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -221,7 +222,7 @@ export async function GET() {
           nodeEnv: process.env.NODE_ENV,
           timestamp: new Date().toISOString(),
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -251,7 +252,7 @@ export async function GET() {
         nodeEnv: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -276,7 +277,7 @@ export async function POST(request: NextRequest) {
       console.error("Missing R2 configuration:", {
         missing: missingVars,
         available: Object.fromEntries(
-          Object.entries(requiredEnvVars).map(([key, value]) => [key, !!value])
+          Object.entries(requiredEnvVars).map(([key, value]) => [key, !!value]),
         ),
         nodeEnv: process.env.NODE_ENV,
       });
@@ -284,7 +285,7 @@ export async function POST(request: NextRequest) {
         {
           error: `R2 configuration incomplete. Missing: ${missingVars.join(", ")}`,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -303,7 +304,7 @@ export async function POST(request: NextRequest) {
               ? formDataError.message
               : "Unknown form parsing error",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -311,7 +312,7 @@ export async function POST(request: NextRequest) {
     const uploadType = (formData.get("type") as UploadType) || "gallery";
 
     console.log(
-      `Processing upload request: ${files.length} files, type: ${uploadType}`
+      `Processing upload request: ${files.length} files, type: ${uploadType}`,
     );
 
     if (!files || files.length === 0) {
@@ -322,7 +323,7 @@ export async function POST(request: NextRequest) {
     if (!config) {
       return NextResponse.json(
         { error: "Invalid upload type" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -330,7 +331,7 @@ export async function POST(request: NextRequest) {
 
     for (const file of files) {
       console.log(
-        `Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`
+        `Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`,
       );
 
       // Validate file
@@ -365,7 +366,7 @@ export async function POST(request: NextRequest) {
         });
 
         console.log(
-          `Sending upload command to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}, ContentType=${file.type}`
+          `Sending upload command to R2: Bucket=${process.env.R2_BUCKET_NAME}, Key=${keyWithFolder}, ContentType=${file.type}`,
         );
 
         const uploadStartTime = Date.now();
@@ -373,7 +374,7 @@ export async function POST(request: NextRequest) {
         const uploadDuration = Date.now() - uploadStartTime;
 
         console.log(
-          `Successfully uploaded file: ${keyWithFolder} in ${uploadDuration}ms`
+          `Successfully uploaded file: ${keyWithFolder} in ${uploadDuration}ms`,
         );
         console.log("Upload result:", uploadResult);
       } catch (uploadError) {
@@ -382,7 +383,7 @@ export async function POST(request: NextRequest) {
           {
             error: `Failed to upload ${file.name}: ${uploadError instanceof Error ? uploadError.message : "Unknown error"}`,
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -393,7 +394,7 @@ export async function POST(request: NextRequest) {
             error:
               "Missing public R2 base URL. Set NEXT_PUBLIC_R2_PUBLIC_BASE_URL or R2_PUBLIC_BASE_URL in production.",
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -403,7 +404,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(
-      `Upload completed successfully. Total files: ${uploadedUrls.length}`
+      `Upload completed successfully. Total files: ${uploadedUrls.length}`,
     );
 
     return NextResponse.json({
@@ -425,7 +426,7 @@ export async function POST(request: NextRequest) {
         details: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -36,7 +36,7 @@ export default function Navbar() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all",
-        scrolled ? "bg-black/80 shadow-2xl backdrop-blur-xl" : "bg-transparent"
+        scrolled ? "bg-black/80 shadow-2xl backdrop-blur-xl" : "bg-transparent",
       )}
     >
       <div className="container flex items-center justify-between py-4 text-white">
@@ -62,7 +62,7 @@ export default function Navbar() {
               href={link.href}
               className={cn(
                 "text-sm uppercase tracking-[0.18em] transition hover:text-primary",
-                pathname === link.href ? "text-primary" : "text-white"
+                pathname === link.href ? "text-primary" : "text-white",
               )}
             >
               {link.label}
@@ -112,7 +112,7 @@ export default function Navbar() {
                     "py-3 px-2 text-base font-medium uppercase tracking-[0.15em] rounded-lg transition-colors",
                     pathname === link.href
                       ? "text-primary bg-primary/10"
-                      : "text-white hover:bg-white/5"
+                      : "text-white hover:bg-white/5",
                   )}
                 >
                   {link.label}
