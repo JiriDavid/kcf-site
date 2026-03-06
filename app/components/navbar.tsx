@@ -69,6 +69,9 @@ export default function Navbar() {
             </Link>
           ))}
           <Button variant="outline" size="sm" asChild>
+            <Link href="/sign-in?redirect_url=/admin">Admin Login</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
             <Link
               href="/contact"
               className="text-white bg-gradient-to-br from-primary to-secondary hover:from-secondary hover:to-primary"
@@ -116,6 +119,9 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-2 border-t border-white/10 mt-2">
+                <Button asChild variant="outline" className="w-full mb-2">
+                  <Link href="/sign-in?redirect_url=/admin">Admin Login</Link>
+                </Button>
                 <Button asChild variant="secondary" className="w-full">
                   <Link href="/contact">Reach Out</Link>
                 </Button>

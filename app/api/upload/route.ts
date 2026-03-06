@@ -1,20 +1,30 @@
 // app/api/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import {
-  S3Client,
-  PutObjectCommand,
-  ListObjectsV2Command,
-} from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+export const runtime = "nodejs";
 
 // Initialize S3 client for Cloudflare R2
 const s3Client = new S3Client({
   region: process.env.R2_REGION || "auto",
   endpoint: process.env.R2_ENDPOINT,
+  forcePathStyle: true,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
   },
 });
+
+function getPublicBaseUrl() {
+  const value =
+    process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ?? process.env.R2_PUBLIC_BASE_URL;
+
+  if (!value) {
+    return null;
+  }
+
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
 
 // File type configurations
 const FILE_CONFIGS = {
@@ -90,11 +100,14 @@ export async function GET() {
     });
 
     // Validate required environment variables
+    const publicBaseUrl = getPublicBaseUrl();
+
     const requiredEnvVars = {
       R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
       R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
       R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
       R2_ENDPOINT: process.env.R2_ENDPOINT,
+      R2_PUBLIC_BASE_URL: publicBaseUrl,
     };
 
     const missingVars = Object.entries(requiredEnvVars)
@@ -146,9 +159,10 @@ export async function GET() {
 
       // Try to verify the upload by attempting to access it
       try {
-        const publicTestUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL
-          ? `${process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL}/${testKey}`
-          : `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${testKey}`;
+        const publicBaseUrl = getPublicBaseUrl();
+        const publicTestUrl = publicBaseUrl
+          ? `${publicBaseUrl}/${testKey}`
+          : `MISSING_PUBLIC_BASE_URL/${testKey}`;
 
         console.log(`Test file should be accessible at: ${publicTestUrl}`);
       } catch (verifyError) {
@@ -276,7 +290,23 @@ export async function POST(request: NextRequest) {
 
     console.log("R2 configuration validated successfully");
 
-    const formData = await request.formData();
+    let formData: FormData;
+    try {
+      formData = await request.formData();
+    } catch (formDataError) {
+      return NextResponse.json(
+        {
+          error:
+            "Failed to parse upload payload. If this only fails in production, the file is likely too large for your hosting request-body limit.",
+          details:
+            formDataError instanceof Error
+              ? formDataError.message
+              : "Unknown form parsing error",
+        },
+        { status: 400 }
+      );
+    }
+
     const files = formData.getAll("files") as File[];
     const uploadType = (formData.get("type") as UploadType) || "gallery";
 
@@ -311,7 +341,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Generate unique filename with folder prefix
-      const fileExtension = file.name.split(".").pop();
+      const fileExtension = file.name.includes(".")
+        ? file.name.split(".").pop()
+        : "bin";
       const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
       const keyWithFolder = `${config.folder}${uniqueName}`;
 
@@ -354,16 +386,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Generate public URL - use custom domain if available, otherwise standard R2 URL
-      let publicUrl: string;
-      if (process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL) {
-        publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL}/${keyWithFolder}`;
-      } else {
-        // Fallback to standard R2 URL
-        const accountId = process.env.R2_ACCOUNT_ID;
-        const bucketName = process.env.R2_BUCKET_NAME;
-        publicUrl = `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${keyWithFolder}`;
+      const publicBaseUrl = getPublicBaseUrl();
+      if (!publicBaseUrl) {
+        return NextResponse.json(
+          {
+            error:
+              "Missing public R2 base URL. Set NEXT_PUBLIC_R2_PUBLIC_BASE_URL or R2_PUBLIC_BASE_URL in production.",
+          },
+          { status: 500 }
+        );
       }
+
+      const publicUrl = `${publicBaseUrl}/${keyWithFolder}`;
       console.log(`Generated public URL: ${publicUrl}`);
       uploadedUrls.push(publicUrl);
     }
