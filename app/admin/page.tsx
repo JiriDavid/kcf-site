@@ -342,13 +342,23 @@ export default function AdminDashboard() {
           );
         }
 
-        const uploadResponse = await fetch(presignResult.uploadUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": file.type || "application/octet-stream",
-          },
-          body: file,
-        });
+        let uploadResponse: Response;
+        try {
+          uploadResponse = await fetch(presignResult.uploadUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+            body: file,
+          });
+        } catch (error) {
+          if (error instanceof TypeError) {
+            throw new Error(
+              "Direct upload blocked by CORS. Configure Cloudflare R2 bucket CORS to allow PUT/GET/HEAD/OPTIONS from https://www.kiitchristianfellowship.com.",
+            );
+          }
+          throw error;
+        }
 
         if (!uploadResponse.ok) {
           const errorText = await uploadResponse.text();
