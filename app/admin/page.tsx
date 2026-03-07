@@ -305,37 +305,59 @@ export default function AdminDashboard() {
       const data = new FormData(form);
 
       const uploadSingleFile = async (type: string, file: File) => {
-        const uploadFormData = new FormData();
-        uploadFormData.append("type", "sermons");
-        uploadFormData.append("files", file);
-
-        const response = await fetch("/api/upload", {
+        const presignResponse = await fetch("/api/upload/presign", {
           method: "POST",
-          body: uploadFormData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uploadType: "sermons",
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+          }),
         });
 
-        const contentType = response.headers.get("content-type") ?? "";
-        if (!response.ok) {
-          if (contentType.includes("application/json")) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to upload sermon file");
+        const presignContentType =
+          presignResponse.headers.get("content-type") ?? "";
+        if (!presignResponse.ok) {
+          if (presignContentType.includes("application/json")) {
+            const errorData = await presignResponse.json();
+            throw new Error(
+              errorData.error || "Failed to prepare direct sermon upload",
+            );
           }
 
-          const errorText = await response.text();
+          const errorText = await presignResponse.text();
           throw new Error(
-            `Failed to upload sermon file (${response.status}): ${errorText.slice(0, 180)}`,
+            `Failed to prepare direct sermon upload (${presignResponse.status}): ${errorText.slice(0, 180)}`,
           );
         }
 
-        const result = contentType.includes("application/json")
-          ? await response.json()
+        const presignResult = presignContentType.includes("application/json")
+          ? await presignResponse.json()
           : null;
 
-        if (!result?.urls || result.urls.length === 0) {
-          throw new Error(`Upload for ${type} did not return a file URL`);
+        if (!presignResult?.uploadUrl || !presignResult?.publicUrl) {
+          throw new Error(
+            `Failed to prepare direct upload for ${type}: missing upload URL`,
+          );
         }
 
-        return { type, urls: result.urls as string[] };
+        const uploadResponse = await fetch(presignResult.uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type || "application/octet-stream",
+          },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          throw new Error(
+            `Failed to upload ${type} directly to storage (${uploadResponse.status}). ${errorText.slice(0, 180)}`,
+          );
+        }
+
+        return { type, urls: [presignResult.publicUrl as string] };
       };
 
       // Handle individual file uploads
