@@ -12,7 +12,9 @@ export default function SermonsPage() {
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string>("");
+  const [activeMode, setActiveMode] = useState<"watch" | "listen">("watch");
   const [playSignal, setPlaySignal] = useState(0);
+  const [audioPlaySignal, setAudioPlaySignal] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
@@ -23,6 +25,7 @@ export default function SermonsPage() {
         setSermons(data);
         if (data.length > 0) {
           setActiveId(data[0].id);
+          setActiveMode("watch");
         }
       } catch (error) {
         console.error("Error fetching sermons:", error);
@@ -40,6 +43,7 @@ export default function SermonsPage() {
 
   const handleWatch = (id: string) => {
     setActiveId(id);
+    setActiveMode("watch");
     setIsPlaying(true);
     setPlaySignal((n) => n + 1);
     const target = document.getElementById("featured-player");
@@ -48,7 +52,19 @@ export default function SermonsPage() {
     }
   };
 
+  const handleListen = (id: string) => {
+    setActiveId(id);
+    setActiveMode("listen");
+    setIsPlaying(false);
+    setAudioPlaySignal((n) => n + 1);
+    const target = document.getElementById("featured-player");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   const handlePlayPause = () => {
+    setActiveMode("watch");
     setIsPlaying((prev) => !prev);
   };
 
@@ -73,6 +89,8 @@ export default function SermonsPage() {
                 sermon={activeSermon}
                 isActive={isPlaying}
                 playSignal={playSignal}
+                audioActive={!isPlaying}
+                audioPlaySignal={audioPlaySignal}
                 onPlayPause={handlePlayPause}
               />
             </div>
@@ -84,6 +102,11 @@ export default function SermonsPage() {
                 key={sermon.id}
                 sermon={sermon}
                 onWatch={handleWatch}
+                onListen={handleListen}
+                isWatchActive={sermon.id === activeId && activeMode === "watch"}
+                isListenActive={
+                  sermon.id === activeId && activeMode === "listen"
+                }
               />
             ))}
           </div>

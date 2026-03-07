@@ -10,12 +10,28 @@ import Link from "next/link";
 type Props = {
   sermon: Sermon;
   onWatch?: (id: string) => void;
+  onListen?: (id: string) => void;
+  isWatchActive?: boolean;
+  isListenActive?: boolean;
 };
 
-export default function SermonCard({ sermon, onWatch }: Props) {
+export default function SermonCard({
+  sermon,
+  onWatch,
+  onListen,
+  isWatchActive = false,
+  isListenActive = false,
+}: Props) {
   const handleWatch = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (onWatch) onWatch(sermon.id);
+  };
+
+  const handleListen = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (onListen) {
+      onListen(sermon.id);
+    }
   };
 
   return (
@@ -48,17 +64,22 @@ export default function SermonCard({ sermon, onWatch }: Props) {
         <div className="flex flex-wrap gap-2 pt-2">
           <Button
             type="button"
-            variant="secondary"
+            variant={isWatchActive ? "default" : "secondary"}
             size="sm"
             className="inline-flex items-center gap-2"
             onClick={handleWatch}
           >
-            <Play className="h-4 w-4" /> Watch
+            <Play className="h-4 w-4" />
+            {isWatchActive ? "Watching" : "Watch"}
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={sermon.audioUrl}>
-              <Music2 className="h-4 w-4" /> Listen
-            </Link>
+          <Button
+            type="button"
+            variant={isListenActive ? "default" : "outline"}
+            size="sm"
+            onClick={handleListen}
+          >
+            <Music2 className="h-4 w-4" />
+            {isListenActive ? "Listening" : "Listen"}
           </Button>
           {sermon.notesUrl ? (
             <Button asChild variant="ghost" size="sm">

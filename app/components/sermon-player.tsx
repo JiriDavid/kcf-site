@@ -16,6 +16,8 @@ type Props = {
   sermon: Sermon;
   isActive?: boolean;
   playSignal?: number;
+  audioActive?: boolean;
+  audioPlaySignal?: number;
   onPlayPause?: () => void;
 };
 
@@ -23,25 +25,45 @@ export default function SermonPlayer({
   sermon,
   isActive = false,
   playSignal,
+  audioActive = false,
+  audioPlaySignal,
   onPlayPause,
 }: Props) {
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = React.useState(false);
+  const [audioReplayKey, setAudioReplayKey] = React.useState(0);
 
   // Auto-play when this player becomes active and playSignal changes
   React.useEffect(() => {
     if (isActive) {
       setIsPlaying(true);
+      setIsAudioPlaying(false);
     } else {
       setIsPlaying(false);
     }
   }, [isActive, playSignal]);
 
+  React.useEffect(() => {
+    if (audioActive) {
+      setIsPlaying(false);
+      setIsAudioPlaying(true);
+      setAudioReplayKey((prev) => prev + 1);
+    }
+  }, [audioActive, audioPlaySignal]);
+
   const handlePlayPause = () => {
+    setIsAudioPlaying(false);
     if (onPlayPause) {
       onPlayPause();
     } else {
       setIsPlaying((prev) => !prev);
     }
+  };
+
+  const handlePlayAudio = () => {
+    setIsPlaying(false);
+    setIsAudioPlaying(true);
+    setAudioReplayKey((prev) => prev + 1);
   };
 
   return (
@@ -80,15 +102,14 @@ export default function SermonPlayer({
             )}
             {isPlaying ? "Pause video" : "Play video"}
           </Button>
-          <Button asChild variant="secondary">
-            <a
-              href={sermon.audioUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2"
-            >
-              <Music2 className="h-4 w-4" /> Play audio
-            </a>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handlePlayAudio}
+            className="inline-flex items-center gap-2"
+          >
+            <Music2 className="h-4 w-4" />
+            {isAudioPlaying ? "Replay audio" : "Play audio"}
           </Button>
           {sermon.notesUrl ? (
             <Button asChild variant="outline">
@@ -103,6 +124,18 @@ export default function SermonPlayer({
             </Button>
           ) : null}
         </div>
+        {isAudioPlaying ? (
+          <div className="rounded-xl border border-white/10 bg-black/40 p-3">
+            <audio
+              key={`${sermon.id}-${audioReplayKey}`}
+              src={sermon.audioUrl}
+              controls
+              autoPlay
+              className="w-full"
+              onEnded={() => setIsAudioPlaying(false)}
+            />
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
