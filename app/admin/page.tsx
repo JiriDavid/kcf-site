@@ -32,6 +32,57 @@ import { Plus, Save, Edit, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth, UserButton } from "@clerk/nextjs";
 
+const PRODUCTION_UPLOAD_LIMIT_BYTES = 4 * 1024 * 1024;
+
+async function compressImageForUpload(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  const image = new Image();
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Failed to read image file"));
+      image.src = objectUrl;
+    });
+
+    const maxDimension = 1920;
+    const widthRatio = maxDimension / image.width;
+    const heightRatio = maxDimension / image.height;
+    const scale = Math.min(1, widthRatio, heightRatio);
+
+    const targetWidth = Math.round(image.width * scale);
+    const targetHeight = Math.round(image.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return file;
+    }
+
+    context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/webp", 0.8);
+    });
+
+    if (!blob || blob.size >= file.size) {
+      return file;
+    }
+
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    return new File([blob], `${baseName}.webp`, { type: "image/webp" });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export default function AdminDashboard() {
   const { isLoaded, userId } = useAuth();
   const router = useRouter();
@@ -132,11 +183,34 @@ export default function AdminDashboard() {
         setUploadProgress("Uploading event media...");
         const uploadFormData = new FormData();
         uploadFormData.append("type", "events");
-        files.forEach((file) => {
+
+        let totalUploadSize = 0;
+        for (const file of files) {
           if (file.size > 0) {
-            uploadFormData.append("files", file);
+            let fileToUpload = file;
+
+            if (
+              process.env.NODE_ENV === "production" &&
+              file.type.startsWith("image/") &&
+              file.size > PRODUCTION_UPLOAD_LIMIT_BYTES
+            ) {
+              setUploadProgress(`Optimizing ${file.name} for production...`);
+              fileToUpload = await compressImageForUpload(file);
+            }
+
+            totalUploadSize += fileToUpload.size;
+            uploadFormData.append("files", fileToUpload);
           }
-        });
+        }
+
+        if (
+          process.env.NODE_ENV === "production" &&
+          totalUploadSize > PRODUCTION_UPLOAD_LIMIT_BYTES
+        ) {
+          throw new Error(
+            "Upload too large for production request limits. Use a smaller image (under ~4MB) or compress further.",
+          );
+        }
 
         const uploadResponse = await fetch("/api/upload", {
           method: "POST",
@@ -146,9 +220,20 @@ export default function AdminDashboard() {
         console.log("Upload response status:", uploadResponse.status);
 
         if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          console.error("Upload failed:", errorData);
-          throw new Error(errorData.error || "Failed to upload files");
+          let errorMessage = "Failed to upload files";
+          const contentType = uploadResponse.headers.get("content-type") ?? "";
+
+          if (contentType.includes("application/json")) {
+            const errorData = await uploadResponse.json();
+            console.error("Upload failed:", errorData);
+            errorMessage = errorData.error || errorData.details || errorMessage;
+          } else {
+            const errorText = await uploadResponse.text();
+            console.error("Upload failed with non-JSON response:", errorText);
+            errorMessage = `Upload failed (${uploadResponse.status}). ${errorText.slice(0, 180)}`;
+          }
+
+          throw new Error(errorMessage);
         }
 
         const uploadResult = await uploadResponse.json();
