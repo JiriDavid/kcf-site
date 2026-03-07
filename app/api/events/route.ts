@@ -3,6 +3,30 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { Event } from "@/types";
 
+function getDatabaseErrorResponse(error: unknown) {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  const isConnectionIssue =
+    message.includes("Server selection timed out") ||
+    message.includes("ENOTFOUND") ||
+    message.includes("ECONNREFUSED") ||
+    message.includes("querySrv");
+
+  if (isConnectionIssue) {
+    return NextResponse.json(
+      {
+        error:
+          "Database connection failed. Check MongoDB network access/allowlist for your Vercel deployment.",
+      },
+      { status: 503 },
+    );
+  }
+
+  return NextResponse.json(
+    { error: "Failed to process events" },
+    { status: 500 },
+  );
+}
+
 export async function GET() {
   try {
     const db = await getDb();
@@ -10,10 +34,7 @@ export async function GET() {
     return NextResponse.json(events);
   } catch (error) {
     console.error("Error fetching events:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch events" },
-      { status: 500 }
-    );
+    return getDatabaseErrorResponse(error);
   }
 }
 
@@ -31,13 +52,10 @@ export async function POST(request: Request) {
     const result = await db.collection<Event>("events").insertOne(newEvent);
     return NextResponse.json(
       { ...newEvent, _id: result.insertedId },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating event:", error);
-    return NextResponse.json(
-      { error: "Failed to create event" },
-      { status: 500 }
-    );
+    return getDatabaseErrorResponse(error);
   }
 }

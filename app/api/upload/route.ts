@@ -15,16 +15,41 @@ const s3Client = new S3Client({
   },
 });
 
-function getPublicBaseUrl() {
-  const value =
-    process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL ??
-    process.env.R2_PUBLIC_BASE_URL;
-
+function normalizeBaseUrl(value?: string | null) {
   if (!value) {
     return null;
   }
 
-  return value.endsWith("/") ? value.slice(0, -1) : value;
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
+}
+
+function isS3ApiEndpoint(urlString: string) {
+  try {
+    const { hostname } = new URL(urlString);
+    return hostname.endsWith(".r2.cloudflarestorage.com");
+  } catch {
+    return false;
+  }
+}
+
+function getPublicBaseUrl() {
+  const candidates = [
+    normalizeBaseUrl(process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL),
+    normalizeBaseUrl(process.env.R2_PUBLIC_BASE_URL),
+  ].filter(Boolean) as string[];
+
+  for (const candidate of candidates) {
+    if (!isS3ApiEndpoint(candidate)) {
+      return candidate;
+    }
+  }
+
+  return candidates[0] ?? null;
 }
 
 // File type configurations
@@ -129,6 +154,18 @@ export async function GET() {
             bucketName: process.env.R2_BUCKET_NAME,
             endpoint: process.env.R2_ENDPOINT,
           },
+        },
+        { status: 500 },
+      );
+    }
+
+    if (publicBaseUrl && isS3ApiEndpoint(publicBaseUrl)) {
+      return NextResponse.json(
+        {
+          status: "error",
+          message:
+            "Invalid public base URL. Do not use the S3 API endpoint (*.r2.cloudflarestorage.com) as asset URL. Use your R2 public domain (e.g. *.r2.dev or custom domain).",
+          configuredPublicBaseUrl: publicBaseUrl,
         },
         { status: 500 },
       );
@@ -262,11 +299,14 @@ export async function POST(request: NextRequest) {
 
   try {
     // Validate required environment variables
+    const publicBaseUrl = getPublicBaseUrl();
+
     const requiredEnvVars = {
       R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
       R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
       R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
       R2_ENDPOINT: process.env.R2_ENDPOINT,
+      R2_PUBLIC_BASE_URL: publicBaseUrl,
     };
 
     const missingVars = Object.entries(requiredEnvVars)
@@ -284,6 +324,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: `R2 configuration incomplete. Missing: ${missingVars.join(", ")}`,
+        },
+        { status: 500 },
+      );
+    }
+
+    if (publicBaseUrl && isS3ApiEndpoint(publicBaseUrl)) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid public base URL. Use your R2 public domain (*.r2.dev or custom domain), not the S3 API endpoint (*.r2.cloudflarestorage.com).",
+          configuredPublicBaseUrl: publicBaseUrl,
         },
         { status: 500 },
       );
@@ -387,7 +438,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const publicBaseUrl = getPublicBaseUrl();
       if (!publicBaseUrl) {
         return NextResponse.json(
           {

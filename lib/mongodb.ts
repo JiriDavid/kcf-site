@@ -1,28 +1,56 @@
 // lib/mongodb.ts
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI!;
-const dbName = process.env.MONGODB_DB!;
+const uri = process.env.MONGODB_URI;
+const dbName = process.env.MONGODB_DB;
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+let clientPromise: Promise<MongoClient> | null = null;
 
-if (process.env.NODE_ENV === "development") {
-  // In development, use a global variable to preserve the connection
-  if (!(global as any)._mongoClientPromise) {
-    client = new MongoClient(uri);
-    (global as any)._mongoClientPromise = client.connect();
+function createClient() {
+  if (!uri) {
+    throw new Error("Missing MONGODB_URI environment variable");
   }
-  clientPromise = (global as any)._mongoClientPromise;
-} else {
-  // In production, create a new connection
-  client = new MongoClient(uri);
-  clientPromise = client.connect();
+
+  return new MongoClient(uri, {
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
 }
 
-export default clientPromise;
+async function getClient(): Promise<MongoClient> {
+  if (process.env.NODE_ENV === "development") {
+    const globalWithMongo = global as typeof globalThis & {
+      _mongoClientPromise?: Promise<MongoClient>;
+    };
+
+    if (!globalWithMongo._mongoClientPromise) {
+      const client = createClient();
+      globalWithMongo._mongoClientPromise = client.connect();
+    }
+
+    return globalWithMongo._mongoClientPromise;
+  }
+
+  if (!clientPromise) {
+    const client = createClient();
+    clientPromise = client.connect();
+  }
+
+  try {
+    return await clientPromise;
+  } catch (error) {
+    clientPromise = null;
+    throw error;
+  }
+}
+
+export default getClient;
 
 export async function getDb() {
-  const client = await clientPromise;
+  if (!dbName) {
+    throw new Error("Missing MONGODB_DB environment variable");
+  }
+
+  const client = await getClient();
   return client.db(dbName);
 }
