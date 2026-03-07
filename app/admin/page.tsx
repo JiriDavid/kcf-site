@@ -304,59 +304,65 @@ export default function AdminDashboard() {
     try {
       const data = new FormData(form);
 
+      const uploadSingleFile = async (type: string, file: File) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append("type", "sermons");
+        uploadFormData.append("files", file);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        const contentType = response.headers.get("content-type") ?? "";
+        if (!response.ok) {
+          if (contentType.includes("application/json")) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to upload sermon file");
+          }
+
+          const errorText = await response.text();
+          throw new Error(
+            `Failed to upload sermon file (${response.status}): ${errorText.slice(0, 180)}`,
+          );
+        }
+
+        const result = contentType.includes("application/json")
+          ? await response.json()
+          : null;
+
+        if (!result?.urls || result.urls.length === 0) {
+          throw new Error(`Upload for ${type} did not return a file URL`);
+        }
+
+        return { type, urls: result.urls as string[] };
+      };
+
       // Handle individual file uploads
       const uploadPromises: Promise<{ type: string; urls: string[] }>[] = [];
 
       // Upload thumbnail
       const thumbnailFile = data.get("thumbnailFile") as File;
       if (thumbnailFile && thumbnailFile.size > 0) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("type", "sermons");
-        uploadFormData.append("files", thumbnailFile);
-        uploadPromises.push(
-          fetch("/api/upload", { method: "POST", body: uploadFormData })
-            .then((res) => res.json())
-            .then((result) => ({ type: "thumbnail", urls: result.urls })),
-        );
+        uploadPromises.push(uploadSingleFile("thumbnail", thumbnailFile));
       }
 
       // Upload video
       const videoFile = data.get("videoFile") as File;
       if (videoFile && videoFile.size > 0) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("type", "sermons");
-        uploadFormData.append("files", videoFile);
-        uploadPromises.push(
-          fetch("/api/upload", { method: "POST", body: uploadFormData })
-            .then((res) => res.json())
-            .then((result) => ({ type: "video", urls: result.urls })),
-        );
+        uploadPromises.push(uploadSingleFile("video", videoFile));
       }
 
       // Upload audio
       const audioFile = data.get("audioFile") as File;
       if (audioFile && audioFile.size > 0) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("type", "sermons");
-        uploadFormData.append("files", audioFile);
-        uploadPromises.push(
-          fetch("/api/upload", { method: "POST", body: uploadFormData })
-            .then((res) => res.json())
-            .then((result) => ({ type: "audio", urls: result.urls })),
-        );
+        uploadPromises.push(uploadSingleFile("audio", audioFile));
       }
 
       // Upload notes
       const notesFile = data.get("notesFile") as File;
       if (notesFile && notesFile.size > 0) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("type", "sermons");
-        uploadFormData.append("files", notesFile);
-        uploadPromises.push(
-          fetch("/api/upload", { method: "POST", body: uploadFormData })
-            .then((res) => res.json())
-            .then((result) => ({ type: "notes", urls: result.urls })),
-        );
+        uploadPromises.push(uploadSingleFile("notes", notesFile));
       }
 
       // Wait for all uploads to complete
@@ -406,6 +412,7 @@ export default function AdminDashboard() {
       };
 
       setUploadProgress("Saving sermon...");
+      console.log("Submitting sermon payload to /api/sermons");
       const response = await fetch("/api/sermons", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -419,7 +426,16 @@ export default function AdminDashboard() {
         toast.success("Sermon created successfully");
         setUploadProgress("");
       } else {
-        throw new Error("Failed to create sermon");
+        const contentType = response.headers.get("content-type") ?? "";
+        if (contentType.includes("application/json")) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create sermon");
+        }
+
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to create sermon (${response.status}): ${errorText.slice(0, 180)}`,
+        );
       }
     } catch (error) {
       console.error("Error creating sermon:", error);

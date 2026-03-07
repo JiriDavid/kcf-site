@@ -5,6 +5,7 @@ import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({
@@ -57,6 +58,7 @@ export default function RootLayout({
           <Navbar />
           <main className="">{children}</main>
           <Footer />
+          <Toaster richColors position="top-right" />
         </body>
       </html>
     </ClerkProvider>
