@@ -744,6 +744,7 @@ export default function AdminDashboard() {
                         required: false,
                         accept: "image/*,video/*,audio/*,.pdf",
                         multiple: true,
+                        maxSizeMB: 50,
                       },
                       {
                         name: "image",
@@ -804,6 +805,7 @@ export default function AdminDashboard() {
                         required: false,
                         accept: "image/*",
                         multiple: false,
+                        maxSizeMB: 10,
                       },
                       {
                         name: "videoFile",
@@ -812,6 +814,7 @@ export default function AdminDashboard() {
                         required: false,
                         accept: "video/*",
                         multiple: false,
+                        maxSizeMB: 100,
                       },
                       {
                         name: "audioFile",
@@ -820,6 +823,7 @@ export default function AdminDashboard() {
                         required: false,
                         accept: "audio/*",
                         multiple: false,
+                        maxSizeMB: 100,
                       },
                       {
                         name: "notesFile",
@@ -828,6 +832,7 @@ export default function AdminDashboard() {
                         required: false,
                         accept: ".pdf",
                         multiple: false,
+                        maxSizeMB: 100,
                       },
                       {
                         name: "thumbnail",
@@ -903,6 +908,7 @@ export default function AdminDashboard() {
                         required: false,
                         accept: "image/*",
                         multiple: true,
+                        maxSizeMB: 10,
                       },
                       {
                         name: "images",
@@ -1038,6 +1044,7 @@ type Field =
       required?: boolean;
       accept?: string;
       multiple?: boolean;
+      maxSizeMB?: number;
     }
   | {
       name: string;
@@ -1063,6 +1070,34 @@ function AdminForm({
   fields: Field[];
   cta: string;
 }) {
+  const matchesAccept = (file: File, accept?: string) => {
+    if (!accept) {
+      return true;
+    }
+
+    const acceptedPatterns = accept
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    if (acceptedPatterns.length === 0) {
+      return true;
+    }
+
+    return acceptedPatterns.some((pattern) => {
+      if (pattern.startsWith(".")) {
+        return file.name.toLowerCase().endsWith(pattern.toLowerCase());
+      }
+
+      if (pattern.endsWith("/*")) {
+        const prefix = pattern.slice(0, -1);
+        return file.type.startsWith(prefix);
+      }
+
+      return file.type === pattern;
+    });
+  };
+
   return (
     <form
       className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5"
@@ -1110,19 +1145,22 @@ function AdminForm({
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1 file:text-sm file:text-primary-foreground file:hover:bg-primary/90"
                   onChange={(e) => {
                     const files = e.target.files;
+                    const maxSizeMB = field.maxSizeMB ?? 10;
+                    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
                     if (files) {
                       for (let i = 0; i < files.length; i++) {
                         const file = files[i];
-                        if (file.size > 10 * 1024 * 1024) {
+                        if (file.size > maxSizeBytes) {
                           alert(
-                            `File "${file.name}" is too large. Maximum size is 10MB.`,
+                            `File "${file.name}" is too large. Maximum size is ${maxSizeMB}MB.`,
                           );
                           e.target.value = "";
                           return;
                         }
-                        if (!file.type.startsWith("image/")) {
+                        if (!matchesAccept(file, field.accept)) {
                           alert(
-                            `File "${file.name}" is not an image. Please select image files only.`,
+                            `File "${file.name}" has an unsupported type for this field.`,
                           );
                           e.target.value = "";
                           return;
