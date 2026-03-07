@@ -4,10 +4,31 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "nodejs";
 
+function normalizeR2Endpoint(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.origin;
+  } catch {
+    return trimmed;
+  }
+}
+
+const configuredR2Endpoint = process.env.R2_ENDPOINT;
+const normalizedR2Endpoint = normalizeR2Endpoint(configuredR2Endpoint);
+
 // Initialize S3 client for Cloudflare R2
 const s3Client = new S3Client({
   region: process.env.R2_REGION || "auto",
-  endpoint: process.env.R2_ENDPOINT,
+  endpoint: normalizedR2Endpoint ?? undefined,
   forcePathStyle: true,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
@@ -112,14 +133,16 @@ export async function GET() {
         : "NOT SET",
     );
     console.log("Bucket Name:", process.env.R2_BUCKET_NAME);
-    console.log("Endpoint:", process.env.R2_ENDPOINT);
+    console.log("Endpoint (configured):", configuredR2Endpoint);
+    console.log("Endpoint (effective):", normalizedR2Endpoint);
     console.log("Node Environment:", process.env.NODE_ENV);
 
     console.log("R2 configuration check:", {
       hasAccessKey: !!process.env.R2_ACCESS_KEY_ID,
       hasSecretKey: !!process.env.R2_SECRET_ACCESS_KEY,
       bucketName: process.env.R2_BUCKET_NAME,
-      endpoint: process.env.R2_ENDPOINT,
+      endpointConfigured: configuredR2Endpoint,
+      endpointEffective: normalizedR2Endpoint,
       region: process.env.R2_REGION || "auto",
       customDomain: process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL,
       nodeEnv: process.env.NODE_ENV,
@@ -132,7 +155,7 @@ export async function GET() {
       R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
       R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
       R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
-      R2_ENDPOINT: process.env.R2_ENDPOINT,
+      R2_ENDPOINT: normalizedR2Endpoint,
       R2_PUBLIC_BASE_URL: publicBaseUrl,
     };
 
@@ -152,7 +175,8 @@ export async function GET() {
             accessKeyPrefix: accessKey ? accessKey.substring(0, 8) : null,
             hasSecretKey: !!secretKey,
             bucketName: process.env.R2_BUCKET_NAME,
-            endpoint: process.env.R2_ENDPOINT,
+            endpointConfigured: configuredR2Endpoint,
+            endpointEffective: normalizedR2Endpoint,
           },
         },
         { status: 500 },
@@ -275,8 +299,15 @@ export async function GET() {
       diagnostic: {
         accessKeyPrefix: accessKey ? accessKey.substring(0, 8) : null,
         secretKeyPrefix: secretKey ? secretKey.substring(0, 8) : null,
-        endpoint: process.env.R2_ENDPOINT,
+        endpointConfigured: configuredR2Endpoint,
+        endpointEffective: normalizedR2Endpoint,
         customDomain: process.env.NEXT_PUBLIC_R2_PUBLIC_BASE_URL,
+        endpointPathWarning:
+          configuredR2Endpoint &&
+          normalizedR2Endpoint &&
+          configuredR2Endpoint !== normalizedR2Endpoint
+            ? "R2_ENDPOINT contains a path segment; use origin only in environment variables"
+            : null,
       },
     });
   } catch (error) {
@@ -305,7 +336,7 @@ export async function POST(request: NextRequest) {
       R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
       R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
       R2_BUCKET_NAME: process.env.R2_BUCKET_NAME,
-      R2_ENDPOINT: process.env.R2_ENDPOINT,
+      R2_ENDPOINT: normalizedR2Endpoint,
       R2_PUBLIC_BASE_URL: publicBaseUrl,
     };
 
@@ -319,6 +350,8 @@ export async function POST(request: NextRequest) {
         available: Object.fromEntries(
           Object.entries(requiredEnvVars).map(([key, value]) => [key, !!value]),
         ),
+        endpointConfigured: configuredR2Endpoint,
+        endpointEffective: normalizedR2Endpoint,
         nodeEnv: process.env.NODE_ENV,
       });
       return NextResponse.json(
